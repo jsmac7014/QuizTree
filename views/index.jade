@@ -1,0 +1,88 @@
+doctype html
+html(lang='ko')
+	head
+		meta(charset='UTF-8')
+		meta(name='viewport', content='width=device-width, initial-scale=1.0')
+		meta(http-equiv='X-UA-Compatible', content='ie=edge')
+		link(rel='shortcut icon', href='./img/favicon.ico', type='image/x-icon')
+		link(rel='icon', href='./img/favicon.ico', type='image/x-icon')
+		link(rel='stylesheet', href='./css/font-awesome/css/font-awesome.min.css')
+		link(rel='stylesheet', href='./css/index.css')
+		link(rel='stylesheet', href='./css/bulma.css')
+		title QuizTree
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
+		script(type='text/javascript').
+			document.addEventListener('DOMContentLoaded', function () {
+			var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+			if ($navbarBurgers.length > 0) {
+			$navbarBurgers.forEach(function ($el) {
+			$el.addEventListener('click', function () {
+			var target = $el.dataset.target;
+			var $target = document.getElementById(target);
+			$el.classList.toggle('is-active');
+			$target.classList.toggle
+			('is-active');
+			});
+			});
+			}
+			});
+	body
+		nav.navbar.is-transparent
+			.navbar-brand
+				a.navbar-item(href='/')
+					img(src='./img/QuizTree@2.png', alt='QuizTree')
+					h1(style='margin-left:10px;font-size:24px') QuizTree
+				.navbar-burger.burger(data-target='navMenu')
+					span
+					span
+					span
+			#navMenu.navbar-menu
+				.navbar-start
+					form(method='post' action='search')
+						input#searchbar.input(type='text', placeholder='Search')
+				.navbar-end
+					.navbar-item
+						.field.is-grouped
+							p.control
+								a.bd-tw-button.button(target='_blank', href='/register')
+									span.icon
+										i.fa.fa-user-plus
+									span
+										| Register
+							p.control
+								a.button.is-primary(href='/login')
+									span.icon
+										i.fa.fa-sign-in
+									span Login
+		.container
+			.wrapper
+				- for(quiz in list){
+					.card
+						header.card-header
+							p.card-header-title
+								// 퀴즈 이름
+								| #{quiz.name}
+						.card-content
+							.content
+								// 퀴즈 설명
+								span.substance #{quiz.explan}
+								br
+								// 카테고리
+								- for(tag in quiz.tags){
+									a.tag.is-light(href=`/tags/${tags[tag]}`) #{tags[tag]}
+								- }
+								br
+								// 올린시간
+								time(datetime=`${quiz.time}`) #{quiz.k_time}
+								// 만든 사람
+								span.author
+									a #{quiz.auther}
+							footer.card-footer
+								a.card-footer-item(href=`/play/${quiz.id}`) Play
+								a.card-footer-item(href='#' onclick=`like('${quiz.id}')`)
+									i.fa.fa-thumbs-o-up(aria-hidden='true')
+									| Like
+				- }
+			a(href="/create/")#addBtn.button
+				i.fa.fa-plus(aria-hidden='true')
+		script(src='./js/index.js')
