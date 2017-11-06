@@ -15,7 +15,7 @@ const isContains = (it, found) => {
 const URL = route => {
 	return "https://localhost" + route;
 };
-const query = (url, querys) =>{
+const query = (url, querys) => {
 	querys.filter
 }
 app.set('views', Path.join(__dirname, 'views'));
@@ -34,6 +34,16 @@ app.use((req, res, next) => {
 	}
 	next();
 });
-app.get('/',(req,res)=>{
+app.get('/', (req, res) => {
 
+});
+app.get('/login', (req, res) => {
+
+	res.render('login',{});
+});
+app.get('/register', (req, res) => {
+	res.render('register',{});
+});
+app.get('/mypage', (req, res) => {
+	res.render('mypage',{});
 });
