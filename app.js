@@ -1,5 +1,5 @@
 const Express = require('express');
-const Mysql = require('mysql');
+const Mongoose = require('mongoose');
 const Path = require('path');
 const Crypto = require('crypto');
 const Logger = require('morgan');
@@ -8,7 +8,16 @@ const CookieParser = require('cookie-parser');
 const BodyParser = require('body-parser');
 const Useragent = require('express-useragent');
 const Passport = require('passport');
+const ExpressSession = require('express-session');
+const LocalStrategy = require('passport-local').Strategy;
 const app = Express();
+const Admin = require("firebase-admin");
+const DB =
+const ServiceAccount = require("path/to/serviceAccountKey.json");
+Admin.initializeApp({
+	credential: Admin.credential.cert(ServiceAccount),
+	databaseURL: "https://<DATABASE_NAME>.firebaseio.com"
+});
 const isContains = (it, found) => {
 	return Object.keys(it).indexOf(found) > -1 ? true : false;
 };
@@ -34,16 +43,23 @@ app.use((req, res, next) => {
 	}
 	next();
 });
-app.get('/', (req, res) => {
-
+app.get('/', (req, res) =>{
+	res.render('index',{});
 });
 app.get('/login', (req, res) => {
 
-	res.render('login',{});
+	res.render('login', {});
 });
 app.get('/register', (req, res) => {
-	res.render('register',{});
+	res.render('register', {});
 });
 app.get('/mypage', (req, res) => {
-	res.render('mypage',{});
+	res.render('mypage', {});
 });
+app.get('/make', (req, res) => {
+	res.render('make', {});
+});
+app.get('/play', (req, res) => {
+	res.render('play', {});
+});
+require('http').createServer(app).listen(80);
