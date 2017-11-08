@@ -104,7 +104,7 @@ app.post('/login', (req, res) => {
 		req.session.username = data.displayName;
 		const token = setToken(sha512(username + "/" + new Date().getTime()));
 		if (token == DBERROR) req.session.usermsg = '로그인에 실패하였습니다. 다시 시도하세요.';
-		req.session.token = setToken(sha512(username + "/" + new Date().getTime()));
+		req.session.token = token;
 	}).catch(error => {
 		req.session.usermsg = '로그인에 실패하였습니다. 다시 시도하세요.';
 		RedirectURL = '/login';
