@@ -19,6 +19,13 @@ const filrebaseApp = admin.initializeApp({
 });
 const DBERROR = 'DBERROR';
 const DBSUCCESS = 'DBSUECCSS';
+const DB = mysql.createConnection({
+		host: 'localhost',
+		port: 3306,
+		user: 'node',
+		password: fs.readFileSync('./DBpassword'),
+		database: name
+});
 const addUID = async(email, uid) =>
 	return DB.query(`INSERT INTO account (emai,uid) VALUES('${email}','${uid}');`, (err, result) => {
 		if (err) return DBERROR;
