@@ -1,5 +1,5 @@
 const Express = require('express');
-const MariaDB= require('mysql');
+const MariaDB = require('mysql');
 const Path = require('path');
 const Crypto = require('crypto');
 const Logger = require('morgan');
@@ -20,32 +20,36 @@ const filrebaseApp = admin.initializeApp({
 const DBERROR = 'DBERROR';
 const DBSUCCESS = 'DBSUECCSS';
 const DB = mysql.createConnection({
-		host: 'localhost',
-		port: 3306,
-		user: 'quiztree',
-		password: fs.readFileSync('./DBpassword'),
-		database: 'quiztree'
+	host: 'localhost',
+	port: 3306,
+	user: 'quiztree',
+	password: fs.readFileSync('./DBpassword'),
+	database: 'quiztree'
 });
-const addUID = async(email, uid) =>
+const addUID = async(email, uid) => {
 	return DB.query(`INSERT INTO account (emai,uid) VALUES('${email}','${uid}');`, (err, result) => {
 		if (err) return DBERROR;
 		return DBSUCCESS;
 	});
-const getUID = email =>
+};
+const getUID = email => {
 	return DB.query(`SELECT * account WHERE email='${email}'`, (err, result) => {
 		if (err) return DBERROR;
 		return result[0].uid;
 	});
-const getToken = async email =>
+};
+const getToken = async email => {
 	return DB.query(`SELECT * account WHERE email='${email}'`, (err, result) => {
 		if (err) return DBERROR;
 		return result[0].token;
 	});
-const setToken = async token =>
+};
+const setToken = async token => {
 	return DB.query(`UPDATE account SET token='${token}'`, (err, result) => {
 		if (err) return DBERROR;
 		return result[0].token;
 	});
+};
 const defaultAuth = admin.auth();
 const db = admin.database();
 const ref = db.ref("restricted_access/secret_document");
