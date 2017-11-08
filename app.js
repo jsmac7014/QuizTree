@@ -22,9 +22,9 @@ const DBSUCCESS = 'DBSUECCSS';
 const DB = mysql.createConnection({
 		host: 'localhost',
 		port: 3306,
-		user: 'node',
+		user: 'quiztree',
 		password: fs.readFileSync('./DBpassword'),
-		database: name
+		database: 'quiztree'
 });
 const addUID = async(email, uid) =>
 	return DB.query(`INSERT INTO account (emai,uid) VALUES('${email}','${uid}');`, (err, result) => {
