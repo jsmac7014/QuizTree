@@ -2,7 +2,7 @@ include msg
 doctype html
 html(lang='ko')
 	head
-		meta(charset='UTF-8')
+		meta(charset='UTF-8	')
 		meta(name='viewport', content='width=device-width, initial-scale=1.0')
 		meta(http-equiv='X-UA-Compatible', content='ie=edge')
 		link(rel='shortcut icon', href='./img/favicon.ico', type='image/x-icon')
@@ -13,6 +13,7 @@ html(lang='ko')
 		link(rel='stylesheet', href='./css/font/stylesheet.css')
 		title Register
 	body
+		+msg_alert(usermsg)
 		.container
 			.wrapper
 				.image
@@ -44,4 +45,3 @@ html(lang='ko')
 							button.button.is-primary Sign Up
 						.control
 							a.button.is-text(href='./login') Cancel
-		mixin msg(usermsg);
