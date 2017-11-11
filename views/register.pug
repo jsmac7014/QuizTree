@@ -1,9 +1,47 @@
+include msg
 doctype html
 html(lang='ko')
 	head
 		meta(charset='UTF-8')
 		meta(name='viewport', content='width=device-width, initial-scale=1.0')
 		meta(http-equiv='X-UA-Compatible', content='ie=edge')
+		link(rel='shortcut icon', href='./img/favicon.ico', type='image/x-icon')
+		link(rel='icon', href='./img/favicon.ico', type='image/x-icon')
 		link(rel='stylesheet', href='./css/register.css')
+		link(rel='stylesheet', href='./css/font-awesome/css/font-awesome.min.css')
+		link(rel='stylesheet', href='./css/bulma.css')
+		link(rel='stylesheet', href='./css/font/stylesheet.css')
 		title Register
 	body
+		.container
+			.wrapper
+				.image
+					img(src='./img/Tree.png', alt='QuizTree')
+			.wrapper
+				.title
+					h1 Create Account
+				form(action='./register',method='post')
+					.field
+						label.label Username
+						.control.has-icons-left.has-icons-right
+							input.input(type='text', placeholder='Username', name='name')
+							span.icon.is-small.is-left
+								i.fa.fa-user
+					.field
+						label.label Email
+						.control.has-icons-left.has-icons-right
+							input.input(type='email', placeholder='Email', name='email')
+							span.icon.is-small.is-left
+								i.fa.fa-envelope
+					.field
+						label.label Password
+						.control.has-icons-left.has-icons-right
+							input.input(type='password', placeholder='Password',name='password')
+							span.icon.is-small.is-left
+								i.fa.fa-key
+					.field.is-grouped
+						.control
+							button.button.is-primary Sign Up
+						.control
+							a.button.is-text(href='./login') Cancel
+		mixin msg(usermsg);
