@@ -110,7 +110,7 @@ app.get('/', (req, res) => {
 	res.render('index', {});
 });
 app.get('/login', (req, res) => {
-	if (!isLogin(req)) res.render('login', {});
+	if (!isLogin(req)) res.render('login', {usermsg:req.session.usermsg == undefined ? '':req.session.usermsg });
 	else res.render(URL('/'));
 });
 app.post('/login', (req, res) => {
@@ -152,7 +152,7 @@ app.post('/register', (req, res) => {
 		});
 });
 app.get('/register', (req, res) => {
-	if (!isLogin(req)) res.render('register', {});
+	if (!isLogin(req)) res.render('register',{usermsg:req.session.usermsg == undefined ? '':req.session.usermsg });
 	else res.render(URL('/'));
 });
 app.get('/mypage', (req, res) => {
