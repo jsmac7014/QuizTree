@@ -137,7 +137,7 @@ app.post('/register', (req, res) => {
 			email: req.body.email,
 			emailVerified: false,
 			password: sha512(req.body.password),
-			photoURL: 'https://quiztree.xyz/img/QuizTree@2.png',
+			photoURL: 'https://quiztree.xyz/img/QuizTree.png',
 			displayName: req.body.name,
 			disabled: false,
 		})
