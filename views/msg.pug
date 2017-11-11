@@ -1,5 +1,5 @@
-mixin msg(msg)
+mixin msg_alert(msg)
 	- if (msg!==''){
 		script.
-			alert(msg);
+			alert(`#{msg}`);
 	- }
