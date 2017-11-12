@@ -1,3 +1,4 @@
+/*jshint es3: false, es5: false, esnext: true, moz: true, node: true*/
 const Express = require('express');
 const MariaDB = require('mysql');
 const Path = require('path');
@@ -14,69 +15,71 @@ const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const app = Express();
-const admin = require("firebase-admin");
-const ServiceAccount = require("./quiztree-dec33-firebase-adminsdk-nvlcd-8971655489.json");
-const filrebaseApp = admin.initializeApp({
-	credential: admin.credential.cert(ServiceAccount),
-	databaseURL: "https://quiztree-dec33.firebaseio.com/"
-});
 const DBERROR = 'DBERROR';
 const DBSUCCESS = 'DBSUECCSS';
+const DBNONRESULT = 'DBNONRESULT';
+const mailer = require('express-mailer');
+const AUTH = {
+	user: fs.readFileSync('/home/ubuntu/QuizTree/EMAIL_ID'),
+	pass: fs.readFileSync('/home/ubuntu/QuizTree/EMAIL_PW'),
+};
 const options = {
 	key: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/privkey.pem'),
 	cert: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/fullchain.pem'),
 };
+const DBPassword = fs.readFileSync('/home/ubuntu/QuizTree/DBpassword');
 const DB = MariaDB.createConnection({
 	host: 'localhost',
 	port: 3306,
 	user: 'quiztree',
-	password: fs.readFileSync('/home/ubuntu/QuizTree/DBpassword'),
+	password: DBPassword,
 	database: 'quiztree'
 });
-const addUID = async(email, uid) => {
-	return DB.query(`INSERT INTO account (emai,uid) VALUES('${email}','${uid}');`, (err, result) => {
+const addAccount = params => {
+	return DB.query(`INSERT INTO account SET ?`, params, (err, result) => {
 		if (err) return DBERROR;
 		return DBSUCCESS;
 	});
 };
 const getUID = email => {
-	return DB.query(`SELECT * account WHERE email='${email}'`, (err, result) => {
+	return DB.query(`SELECT * FROM account WHERE email='${email}'`, (err, result) => {
 		if (err) return DBERROR;
 		return result[0].uid;
 	});
 };
-const getToken = async email => {
-	return DB.query(`SELECT * account WHERE email='${email}'`, (err, result) => {
+const getToken = email => {
+	return DB.query(`SELECT * FROM account WHERE email='${email}'`, (err, result) => {
 		if (err) return DBERROR;
 		return result[0].token;
 	});
 };
-const setToken = async token => {
-	return DB.query(`UPDATE account SET token='${token}'`, (err, result) => {
-		if (err) return DBERROR;
-		return result[0].token;
+const setToken = (email, token) => {
+	return DB.query(`UPDATE account SET token='${token}' WHERE email='${email}'`, (err, result) => {
+		return token;
 	});
 };
-const defaultAuth = admin.auth();
-const db = admin.database();
-const ref = db.ref("restricted_access/secret_document");
-const query = (url, querys) => {
-	querys.filter();
-
+const getAccount = param => {
+	return DB.query(`SELECT * FROM account WHERE ?`, param, (err, result) => {
+		if (err) return DBERROR;
+		if (result.length < 0) return DBNONRESULT;
+		return result[0];
+	});
 };
 const isContains = (it, found) => {
-	return Object.keys(it).indexOf(found) > -1 ? true : false
+	return Object.keys(it).indexOf(found) > -1 ? true : false;
 };
 const URL = route => {
-	return "https://quiztree.xyz" + route
+	return "https://quiztree.xyz" + route;
 };
 const sha512 = key => {
-	return Crypto.createHash('sha512').update(key).digest("hex")
+	return Crypto.createHash('sha512').update(key).digest("hex");
 };
 const isLogin = req => {
-	if (req.session.token == getToken(req.session.email)) return true;
-	else return false;
-}
+	if (isContains(req.session, 'email'))
+		if (req.session.token == getToken(req.session.email)) return true;
+		else return false;
+};
+app.set('trust proxy', true);
 app.set('views', Path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.enable('view cache');
@@ -101,62 +104,88 @@ app.use(session({
 	}
 }));
 app.use((req, res, next) => {
-	if (req.session.token != undefined) {
-
+	if (req.session.usermsg !== undefined) {
+		req.session.usermsg = '';
+	}
+	if(isContains(req.query,'msg')){
+		if(req.query.msg == 'success') req.session.usermsg = '이메일인증에 성공하였습니다.';
+		else if(req.query.msg == 'err') req.session.usermsg = '이메일인증에 실패하였습니다.';
 	}
 	next();
+});
+mailer.extend(app, {
+	from: 'quiztreehelp@gmail.com',
+	host: 'smtp.gmail.com', // hostname
+	secureConnection: true, // use SSL
+	port: 465, // port for secure SMTP
+	transportMethod: 'SMTP', // default is SMTP. Accepts anything that nodemailer accepts
+	auth: AUTH
 });
 app.get('/', (req, res) => {
 	res.render('index', {});
 });
 app.get('/login', (req, res) => {
-	if (!isLogin(req)) res.render('login', {usermsg:req.session.usermsg == undefined ? '':req.session.usermsg });
+	if (!isLogin(req)) res.render('login', {
+		usermsg: req.session.usermsg === undefined ? '' : req.session.usermsg
+	});
 	else res.render(URL('/'));
 });
 app.post('/login', (req, res) => {
-	const uid = getUID(req.body.session);
-	admin.auth().getUser(uid).then(userRecord => {
-		console.log(userRecord);
-		const data = userRecord.toJSON();
-		req.session.username = data.displayName;
-		const token = setToken(sha512(username + "/" + new Date().getTime()));
-		if (token == DBERROR) {
-			req.session.usermsg = '로그인에 실패하였습니다. 다시 시도하세요.';
-			res.redirect(URL('/login'));
-		} else {
-			req.session.token = token;
-			res.redirect(URL('/'));
-		}
-	}).catch(error => {
+	const userdata = getAccount({
+		email: req.session.email,
+		password: sha512(req.session.password + DBPassword)
+	});
+	req.session.usermsg = userdata == DBNONRESULT ? '사용자 정보가 잘못되었습니다.' : (userdata == DBERROR ? '죄송합니다. DB 에러입니다.' : '');
+	if (req.session.usermsg !== '') res.redirect(URL('/login'));
+	const token = setToken(sha512(req.session.email + new Date().getMilliseconds() + new Date().getTime()));
+	if (token === DBERROR) {
 		req.session.usermsg = '로그인에 실패하였습니다. 다시 시도하세요.';
 		res.redirect(URL('/login'));
-	});
+	} else {
+		req.session.token = token;
+		req.session.username = userdata.nick;
+		res.redirect(URL('/'));
+	}
 });
 app.post('/register', (req, res) => {
-	admin.auth().createUser({
-			email: req.body.email,
-			emailVerified: false,
-			password: sha512(req.body.password),
-			photoURL: 'https://quiztree.xyz/img/QuizTree.png',
-			displayName: req.body.name,
-			disabled: false,
-		})
-		.then(userRecord => {
-			addUID(req.body.email, userRecord.uid).then(v => req.session.dbmsg = v == DBERROR ? 'DB ERROR' : '');
-			res.redirect(URL('/login'))
-		})
-		.catch(error => {
-			throw error;
-			req.session.usermsg = '오류로 인해 계정을 생성하지 못하였습니다. 다시 시도하세요.';
-			res.redirect(URL('/register'))
-		});
+	console.log(req.body);
+	const token = sha512(req.body.email + new Date().getMilliseconds() + req.body.password + new Date().getTime());
+	req.usermsg = addAccount({
+		email: req.body.email,
+		password: sha512(req.body.password + DBPassword),
+		nick: req.body.name,
+		token: token
+	}) != DBERROR ? '' : '회원가입에 실패하였습니다. 다시 시도하세요.';
+	app.mailer.send('email', {
+		to: req.body.email,
+		subject: 'QuizTree 이메일 인증 안내',
+		name: req.body.name,
+		link: URL('/email/?query=' + token),
+		ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress,
+	}, err => {
+		if (err) throw err;
+	});
+	res.redirect(URL('/login'));
 });
 app.get('/register', (req, res) => {
-	if (!isLogin(req)) res.render('register',{usermsg:req.session.usermsg == undefined ? '':req.session.usermsg });
-	else res.render(URL('/'));
+	if (!isLogin(req)) res.render('register', {
+		usermsg: req.session.usermsg === undefined ? '' : req.session.usermsg
+	});
+	else res.redirect(URL('/'));
 });
 app.get('/mypage', (req, res) => {
 	res.render('mypage', {});
+});
+app.get('/email', (req, res) => {
+	if (isContains(req.query, 'query')) {
+		DB.query(`SELECT * FROM account WHERE ?`, {
+			token: 'token'
+		}, (err, result) => {
+			if (err) res.redirect('/?msg=err');
+			else if (result.length > -1) res.redirect('/?msg=success');
+			else res.redirect('/?msg=err');
+		});
+	} else res.redirect('/?msg=err');
 });
 app.get('/make', (req, res) => {
 	res.render('make', {});
