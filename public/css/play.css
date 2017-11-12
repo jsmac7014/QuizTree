@@ -43,13 +43,11 @@ body{
     justify-content: center;
     align-items: center;
 }
-
 .custom-btn{
     width: 200px;
     height: 60px;
     margin: 5px;
     -webkit-transition: border-color 0.3s;
-    outline:none;
 }
 .custom-btn span{
     position: absolute;
@@ -64,7 +62,6 @@ body{
 .custom-btn:hover{
     border-color: #36afff;
 }
-
 @media screen and (max-width:420px){
     .card{
         width: 350px;

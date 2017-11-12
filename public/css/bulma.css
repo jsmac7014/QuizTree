@@ -1,5 +1,4 @@
 /*! bulma.io v0.6.0 | MIT License | github.com/jgthms/bulma */
-@charset "utf-8"
 @-webkit-keyframes spinAround {
   from {
     -webkit-transform: rotate(0deg);
@@ -1870,7 +1869,7 @@ a.box:active {
   color: #fff;
 }
 .button.is-tree{
-  background-color: #32a19e;
+  background-color: #40e5e5;
   border-color: transparent;
   color: #fff;
 }

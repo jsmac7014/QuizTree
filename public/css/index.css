@@ -29,18 +29,19 @@ body {
     position: absolute;
     top: 50px;
     width: 100%;
-    padding: 10px;
+    padding: 20px;
 }
-
-.card {
+.card{
     margin: 10px;
-    width: 400px;
 }
-
-.card-content {
-    padding: 20px 0px 0px 0px !important;
+.card-content{
+    padding: 0px!important;
 }
-
+.content{
+    margin-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
 .card-footer-item i.fa {
     margin-right: 10px;
 }
@@ -70,9 +71,6 @@ body {
 @media screen and (max-width:420px) {
     .card {
         flex-basis: 100% auto;
-    }
-    .card-content {
-        padding: 20px 10px 0px 10px !important;
     }
 
 }
