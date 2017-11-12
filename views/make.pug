@@ -1,92 +1,54 @@
+include top
 doctype html
 html(lang='ko')
-	head
-		meta(charset='UTF-8')
-		meta(name='viewport', content='width=device-width, initial-scale=1.0')
-		meta(http-equiv='X-UA-Compatible', content='ie=edge')
-		link(rel='shortcut icon', href='./img/favicon.ico', type='image/x-icon')
-		link(rel='icon', href='./img/favicon.ico', type='image/x-icon')
-		link(rel='stylesheet', href='./css/font-awesome/css/font-awesome.min.css')
-		link(rel='stylesheet', href='./css/font/stylesheet.css')
-		link(rel='stylesheet', href='./css/bulma.css')
-		link(rel='stylesheet', href='./css/make.css')
-		title Make
-		script(type='text/javascript').
-			document.addEventListener('DOMContentLoaded', function () {
-			var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
-			if ($navbarBurgers.length > 0) {
-			$navbarBurgers.forEach(function ($el) {
-			$el.addEventListener('click', function () {
-			var target = $el.dataset.target;
-			var $target = document.getElementById(target);
-			$el.classList.toggle('is-active');
-			$target.classList.toggle('is-active');
-			});
-			});
-			}
-			});
-	body
-		nav.navbar.is-transparent
-			.navbar-brand
-				a.navbar-item(href='./index.html')
-					img(src='./img/QuizTree@2.png', alt='QuizTree')
-					h1(style='margin-left:10px;font-size:24px') QuizTree
-				.navbar-burger.burger(data-target='navMenu')
-					span
-					span
-					span
-			#navMenu.navbar-menu
-				.navbar-end
-					.navbar-item
-						.field.is-grouped
-							p.control
-							p.control
+	+top('QuizTree','index',true)
 		.container
 			.wrapper
 				h1.title 퀴즈를 만드세요!
-				.title.card
-					.field
-						.control
-							input.input.is-large(type='text', placeholder='퀴즈 제목')
-					.field
-						.control
-							input.input(type='text', placeholder='퀴즈 설명')
-				.quiz.card
-					.field
-						.control
-							input.input.is-medium(type='text', placeholder='질문을 입력하세요')
-					.answer
-						h3.title.is-4 정답
-						.control
-							label.radio
-								input(type='radio', name='answer' name='')
-								|  A
-							label.radio
-								input(type='radio', name='answer' ='')
-								|  B
-							label.radio
-								input(type='radio', name='answer')
-								|  C
-							label.radio
-								input(type='radio', name='answer')
-								|  D
-					.columns
-						.column
-							.field
-								.control
-									input.input.is-small(type='text', placeholder='옵션 A')
-						.column
-							.field
-								.control
-									input.input.is-small(type='text', placeholder='옵션 B')
-					.columns
-						.column
-							.field
-								.control
-									input.input.is-small(type='text', placeholder='옵션 C')
-						.column
-							.field
-								.control
-									input.input.is-small(type='text', placeholder='옵션 D')
+				form(action='./make', method='post')
+					.title.card
+						.field
+							.control
+								input.input.is-large(type='text', placeholder='퀴즈 제목', name='title')
+						.field
+							.control
+								input.input(type='text', placeholder='퀴즈 설명', name='info')
+					.quiz.card
+						.field
+							.control
+								input.input.is-medium(type='text', placeholder='질문을 입력하세요', name='questions')
+						.answer
+							h3.title.is-4 정답
+							.control
+								label.radio
+									input(type='radio', name='answerradio1',value='A')
+									|  A
+								label.radio
+									input(type='radio', name='answerradio1',value='B')
+									|  B
+								label.radio
+									input(type='radio', name='answerradio1',value='C')
+									|  C
+								label.radio
+									input(type='radio', name='answerradio1',value='D')
+									|  D
+						.columns
+							.column
+								.field
+									.control
+										input.input.is-small(type='text', placeholder='옵션 A',name='answertexta1')
+							.column
+								.field
+									.control
+										input.input.is-small(type='text', placeholder='옵션 B',name='answertextb1')
+						.columns
+							.column
+								.field
+									.control
+										input.input.is-small(type='text', placeholder='옵션 C',name='answertextc1')
+							.column
+								.field
+									.control
+										input.input.is-small(type='text', placeholder='옵션 D',name='answertextd1')
 		button#addBtn.button
 			i.fa.fa-plus(aria-hidden='true')
