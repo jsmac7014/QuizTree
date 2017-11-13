@@ -38,8 +38,7 @@ mixin top(title,css,isLogin)
 					span
 			#navMenu.navbar-menu
 				.navbar-start
-					form(method='post', action='search')
-						input#searchbar.input(type='text', placeholder='Search')
+					input#searchbar.input(type='text', placeholder='Search')
 				- if(!isLogin){
 					.navbar-end
 						.navbar-item
