@@ -28,7 +28,7 @@ body{
 }
 .title.card{
     width: 450px;
-    height: 150px;
+    height: 180px;
     padding: 10px;
 }
 .quiz.card{
@@ -46,7 +46,6 @@ body{
 }
 .title.is-4{
     margin: 5px;
-    font-family: 'nanumsquareroundotflight'; /*my code*/
 }
 .column{
     padding-top: 8px;
