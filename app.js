@@ -46,6 +46,20 @@ const addAccount = (email, password, nick, token) => {
 		token: token
 	});
 };
+const addQuiz = (account, info, tags) => {
+	if (createQuery(`INSERT INTO quizes SET ?`, {
+			id: '',
+			account: account,
+			information: info
+		}) == DBERROR) return DBERROR;
+	tags.forEach(v => {
+		const r = createQuery(`INSERT INTO tags SET ?`, {
+			id: '',
+			tag: v
+		});
+	});
+	return DBSUCCESS;
+};
 const getUID = email => {
 	return DB.query(`SELECT * FROM account WHERE email='${email}'`, (err, result) => {
 		if (err) return DBERROR;
@@ -93,6 +107,11 @@ const isLogin = req => {
 };
 const ifIsContainReturnUserMsg = req => {
 	return req.session.usermsg === undefined ? '' : req.session.usermsg;
+};
+const mapRange = (num, callback, callbackdata) => {
+	return [Array(num).keys()].map(v => {
+		return callback(callbackdata);
+	});
 };
 app.set('trust proxy', true);
 app.set('views', Path.join(__dirname, 'views'));
@@ -189,12 +208,36 @@ app.get('/mypage', (req, res) => {
 });
 app.get('/email', (req, res) => {
 	if (isContains(req.query, 'query')) {
-		if(equalToken(req.query.query)) res.redirect('/?msg=success');
+		if (equalToken(req.query.query)) res.redirect('/?msg=success');
 		else res.redirect('/?msg=err');
 	} else res.redirect('/?msg=err');
 });
 app.get('/make', (req, res) => {
-	res.render('make', {});
+	if (isLogin(req)) res.render('make', {});
+	else res.redirect('/login');
+});
+app.post('/make', (req, res) => {
+	req.session.usermsg = addQuiz(req.session.email, {
+		title: req.body.title,
+		info: req.body.info,
+		radio: mapRange(req.body.quizs, (v, data) => {
+			return data['answerradio' + v];
+		}, req.body),
+		radioText: mapRange(req.body.quizs, (v, data) => {
+			return {
+				a: data['answerradio' + v],
+				b: data['answerradio' + v],
+				c: data['answerradio' + v],
+				d: data['answerradio' + v]
+			};
+		}, req.body),
+		questions: mapRange(req.body.quizs, (v, data) => {
+			return data['questions' + v];
+		}, req.body)
+	}, mapRange(req.body.quizs, (v, data) => {
+		return data['tags' + v];
+	}, req.body)) == DBERROR ? '퀴즈생성에 실패하였습니다.' : '';
+	res.redirect(URL('/make'));
 });
 app.get('/play', (req, res) => {
 	res.render('play', {});
