@@ -51,7 +51,7 @@ const addQuiz = (id, account, info, tags) => {
 	if (createQuery(`INSERT INTO quizes SET ?`, {
 			id: id,
 			account: account,
-			information: info
+			information: JSON.stringify(info)
 		}) == DBERROR) return DBERROR;
 	tags.forEach(v => {
 		if (v !== '') {
@@ -183,6 +183,7 @@ app.post('/login', (req, res) => {
 	} else {
 		req.session.token = token;
 		req.session.username = userdata.nick;
+		req.session.email = req.body.email;
 		res.redirect(URL('/'));
 	}
 });
@@ -218,8 +219,12 @@ app.get('/make', (req, res) => {
 	if (isLogin(req)) res.render('make', {});
 	else res.redirect('/login');
 });
+app.get('/logout', (req, res) => {
+	req.session.destroy();
+	res.clearCookie('sid');
+	res.redirect('back');
+});
 app.post('/make', (req, res) => {
-	console.log(req.body);
 	req.session.usermsg = addQuiz(shortID.generate(), req.session.email, {
 		title: req.body.title,
 		info: req.body.info,
