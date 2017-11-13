@@ -1,54 +1,62 @@
 include top
 doctype html
 html(lang='ko')
-	+top('QuizTree','index',true)
-		.container
-			.wrapper
-				h1.title 퀴즈를 만드세요!
-				form(action='./make', method='post')
-					.title.card
-						.field
-							.control
-								input.input.is-large(type='text', placeholder='퀴즈 제목', name='title')
-						.field
-							.control
-								input.input(type='text', placeholder='퀴즈 설명', name='info')
-					.quiz.card
-						.field
-							.control
-								input.input.is-medium(type='text', placeholder='질문을 입력하세요', name='questions')
-						.answer
-							h3.title.is-4 정답
-							.control
-								label.radio
-									input(type='radio', name='answerradio1',value='A')
-									|  A
-								label.radio
-									input(type='radio', name='answerradio1',value='B')
-									|  B
-								label.radio
-									input(type='radio', name='answerradio1',value='C')
-									|  C
-								label.radio
-									input(type='radio', name='answerradio1',value='D')
-									|  D
-						.columns
-							.column
-								.field
-									.control
-										input.input.is-small(type='text', placeholder='옵션 A',name='answertexta1')
-							.column
-								.field
-									.control
-										input.input.is-small(type='text', placeholder='옵션 B',name='answertextb1')
-						.columns
-							.column
-								.field
-									.control
-										input.input.is-small(type='text', placeholder='옵션 C',name='answertextc1')
-							.column
-								.field
-									.control
-										input.input.is-small(type='text', placeholder='옵션 D',name='answertextd1')
-		button#addBtn.button
-			i.fa.fa-plus(aria-hidden='true')
+	+top('QuizTree - Make Quiz','make',true)
+	.container
+		.wrapper
+			h1.title 퀴즈를 만드세요!
+			form(action='./make', method='post')
+				.title.card
+					.field
+						.control
+							input.input.is-large(type='text', placeholder='퀴즈 제목', name='title')
+					.field
+						.control
+							input.input(type='text', placeholder='퀴즈 설명', name='info')
+					.field
+						.control
+							input.input(type='text', placeholder='#해시태그', name='tags')
+				.quiz.card
+					.field
+						.control
+							input.input.is-medium(type='text', placeholder='질문을 입력하세요', name='questions')
+					.answer
+						h3.title.is-4 정답
+						.control
+							label.radio
+								input(type='radio', name='answerradio1',value='A')
+								|  A
+							label.radio
+								input(type='radio', name='answerradio1',value='B')
+								|  B
+							label.radio
+								input(type='radio', name='answerradio1',value='C')
+								|  C
+							label.radio
+								input(type='radio', name='answerradio1',value='D')
+								|  D
+					.columns
+						.column
+							.field
+								.control
+									input.input.is-small(type='text', placeholder='옵션 A',name='answertexta1')
+						.column
+							.field
+								.control
+									input.input.is-small(type='text', placeholder='옵션 B',name='answertextb1')
+					.columns
+						.column
+							.field
+								.control
+									input.input.is-small(type='text', placeholder='옵션 C',name='answertextc1')
+						.column
+							.field
+								.control
+									input.input.is-small(type='text', placeholder='옵션 D',name='answertextd1')
+				input#quizs(type='hidden',value='1',name='quizs')
+				.add
+					button#addBtn
+						i.fa.fa-plus(aria-hidden='true')
+				button#sendBtn.button
+					i.fa.fa-paper-plane-o(aria-hidden='true')
+				script(src='./js/make.js')
