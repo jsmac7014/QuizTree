@@ -19,6 +19,7 @@ const DBERROR = 'DBERROR';
 const DBSUCCESS = 'DBSUECCSS';
 const DBNONRESULT = 'DBNONRESULT';
 const mailer = require('express-mailer');
+const shortID = require('shortid');
 const AUTH = {
 	user: fs.readFileSync('/home/ubuntu/QuizTree/EMAIL_ID'),
 	pass: fs.readFileSync('/home/ubuntu/QuizTree/EMAIL_PW'),
@@ -46,17 +47,19 @@ const addAccount = (email, password, nick, token) => {
 		token: token
 	});
 };
-const addQuiz = (account, info, tags) => {
+const addQuiz = (id, account, info, tags) => {
 	if (createQuery(`INSERT INTO quizes SET ?`, {
-			id: '',
+			id: id,
 			account: account,
 			information: info
 		}) == DBERROR) return DBERROR;
 	tags.forEach(v => {
-		const r = createQuery(`INSERT INTO tags SET ?`, {
-			id: '',
-			tag: v
-		});
+		if (v !== '') {
+			const r = createQuery(`INSERT INTO tags SET ?`, {
+				id: id,
+				tag: v
+			});
+		}
 	});
 	return DBSUCCESS;
 };
@@ -110,7 +113,7 @@ const ifIsContainReturnUserMsg = req => {
 };
 const mapRange = (num, callback, callbackdata) => {
 	return [Array(num).keys()].map(v => {
-		return callback(callbackdata);
+		return callback(v, callbackdata);
 	});
 };
 app.set('trust proxy', true);
@@ -216,10 +219,11 @@ app.get('/make', (req, res) => {
 	else res.redirect('/login');
 });
 app.post('/make', (req, res) => {
-	req.session.usermsg = addQuiz(req.session.email, {
+	console.log(req.body);
+	req.session.usermsg = addQuiz(shortID.generate(), req.session.email, {
 		title: req.body.title,
 		info: req.body.info,
-		radio: mapRange(req.body.quizs, (v, data) => {
+		radio: mapRange(parseInt(req.body.quizs), (v, data) => {
 			return data['answerradio' + v];
 		}, req.body),
 		radioText: mapRange(req.body.quizs, (v, data) => {
@@ -232,9 +236,8 @@ app.post('/make', (req, res) => {
 		}, req.body),
 		questions: mapRange(req.body.quizs, (v, data) => {
 			return data['questions' + v];
-		}, req.body),
-		tag: req.body.tags.split(', #')
-	}) == DBERROR ? '퀴즈생성에 실패하였습니다.' : '';
+		}, req.body)
+	}, req.body.tags.split('#')) == DBERROR ? '퀴즈생성에 실패하였습니다.' : '';
 	res.redirect(URL('/make'));
 });
 app.get('/play', (req, res) => {
