@@ -209,7 +209,6 @@ app.get('/mypage', (req, res) => {
 app.get('/email', (req, res) => {
 	if (isContains(req.query, 'query')) {
 		if (equalToken(req.query.query)) res.redirect('/?msg=success');
-		else res.redirect('/?msg=err');
 	} else res.redirect('/?msg=err');
 });
 app.get('/make', (req, res) => {
@@ -233,10 +232,9 @@ app.post('/make', (req, res) => {
 		}, req.body),
 		questions: mapRange(req.body.quizs, (v, data) => {
 			return data['questions' + v];
-		}, req.body)
-	}, mapRange(req.body.quizs, (v, data) => {
-		return data['tags' + v];
-	}, req.body)) == DBERROR ? '퀴즈생성에 실패하였습니다.' : '';
+		}, req.body),
+		tag: req.body.tags.split(', #')
+	}) == DBERROR ? '퀴즈생성에 실패하였습니다.' : '';
 	res.redirect(URL('/make'));
 });
 app.get('/play', (req, res) => {
