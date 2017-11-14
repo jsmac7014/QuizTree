@@ -119,7 +119,7 @@ const ifIsContainReturnUserMsg = req => {
 	return req.session.usermsg === undefined ? '' : req.session.usermsg;
 };
 const mapRange = (num, callback, callbackdata) => {
-	return [Array(num).keys()].map(v => {
+	return [...Array(num).keys()].map(v => {
 		return callback(v, callbackdata);
 	});
 };
