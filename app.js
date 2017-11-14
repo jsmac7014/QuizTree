@@ -39,6 +39,13 @@ const createQuery = (query, params) => {
 		return DBSUCCESS;
 	});
 };
+const getQuizListByAccount = email => {
+	return DB.query(`SELECT * quizs WHERE account = ${DB.escape(email)} ORDER BY timestp DESC LIMIT 0,9999`, (err, result) => {
+		if (err) return DBERROR;
+		if (result.length < 0) return DBNONRESULT;
+		return result;
+	});
+};
 const addAccount = (email, password, nick, token) => {
 	return createQuery(`INSERT INTO account SET ?`, {
 		email: email,
@@ -208,7 +215,8 @@ app.get('/register', (req, res) => {
 	else res.redirect(URL('/'));
 });
 app.get('/mypage', (req, res) => {
-	res.render('mypage', {});
+	if (isLogin(req)) res.render('mypage', {});
+	else res.redirect('/login');
 });
 app.get('/email', (req, res) => {
 	if (isContains(req.query, 'query')) {
