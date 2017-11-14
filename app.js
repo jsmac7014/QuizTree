@@ -94,13 +94,6 @@ const equalToken = token => {
 	});
 	return r == DBERROR || r == DBNONRESULT ? false : true;
 };
-const getAccount = param => {
-	return DB.query(`SELECT * FROM account WHERE ?`, param, (err, result) => {
-		if (err) return DBERROR;
-		if (result.length < 0) return DBNONRESULT;
-		return result[0];
-	});
-};
 const isContains = (it, found) => {
 	return Object.keys(it).indexOf(found) > -1 ? true : false;
 };
@@ -176,23 +169,36 @@ app.get('/login', (req, res) => {
 	else res.render(URL('/'));
 });
 app.post('/login', (req, res) => {
-	const userdata = getAccount({
-		email: req.body.email,
-		password: sha512(req.body.password + DBPassword)
+	DB.query(`SELECT * FROM account WHERE email = ${DB.escape(req.body.email)} AND password = '${sha512(req.body.password+DBPassword)}'`, (err, result) => {
+		console.log(`SELECT * FROM account WHERE email = ${DB.escape(req.body.email)} AND password = '${req.body.email}'`);
+		console.log(err);
+		if (err !== null) {
+			req.session.usermsg = '로그인에 실패하였습니다.';
+		}
+		if (result.length === 0) {
+			req.session.usermsg = '사용자 정보가 잘못되었습니다.';
+		}
+		if (req.session.usermsg !== '') {
+			res.redirect(URL('/login'));
+		} else {
+			const token = sha512('' + req.body.email + new Date().getMilliseconds() + new Date().getTime());
+			DB.query(`UPDATE account SET token='${token}' WHERE email=${DB.escape(req.body.email)}`, (err2, result2) => {
+				console.log(err2);
+				console.log(result2);
+				if (err !== null) {
+					req.session.usermsg = '로그인에 실패하였습니다.';
+				}
+				if (req.session.usermsg !== '') {
+					res.redirect(URL('/login'));
+				} else {
+					req.session.token = token;
+					req.session.username = result[0].nick;
+					req.session.email = req.body.email;
+					res.redirect(URL('/'));
+				}
+			});
+		}
 	});
-	req.session.usermsg = userdata == DBNONRESULT ? '사용자 정보가 잘못되었습니다.' : (userdata == DBERROR ? '죄송합니다. DB 에러입니다.' : '');
-	if (req.session.usermsg !== '') res.redirect(URL('/login'));
-	const token = sha512('' + req.body.email + new Date().getMilliseconds() + new Date().getTime());
-	setToken(req.body.email, token);
-	if (token === DBERROR) {
-		req.session.usermsg = '로그인에 실패하였습니다. 다시 시도하세요.';
-		res.redirect(URL('/login'));
-	} else {
-		req.session.token = token;
-		req.session.username = userdata.nick;
-		req.session.email = req.body.email;
-		res.redirect(URL('/'));
-	}
 });
 app.post('/register', (req, res) => {
 	const token = sha512(req.body.email + new Date().getMilliseconds() + req.body.password + new Date().getTime());
@@ -215,7 +221,10 @@ app.get('/register', (req, res) => {
 	else res.redirect(URL('/'));
 });
 app.get('/mypage', (req, res) => {
-	if (isLogin(req)) res.render('mypage', {});
+	if (isLogin(req)) res.render('mypage', {
+		usermsg: ifIsContainReturnUserMsg(req),
+		username: req.session.username
+	});
 	else res.redirect('/login');
 });
 app.get('/email', (req, res) => {
