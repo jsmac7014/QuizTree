@@ -1,7 +1,7 @@
 include top
 doctype html
 html(lang='ko')
-	+top('QuizTree','index',isLogin)
+	+top('QuizTree','index',isLogin,username)
 		.container
 			.wrapper
 				- for(quiz in list){
