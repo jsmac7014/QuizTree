@@ -1,4 +1,4 @@
-mixin top(title,css,isLogin)
+mixin top(title,css,isLogin,username)
 	include msg
 	head
 		meta(charset='UTF-8')
@@ -9,6 +9,7 @@ mixin top(title,css,isLogin)
 		link(rel='stylesheet', href='./css/font-awesome/css/font-awesome.min.css')
 		link(rel='stylesheet', href=`./css/${css}.css`)
 		link(rel='stylesheet', href='./css/bulma.css')
+		link(rel='stylesheet', href='./css/font.css')
 		title #{title}
 		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
 		script(type='text/javascript').
@@ -55,4 +56,21 @@ mixin top(title,css,isLogin)
 										span.icon
 											i.fa.fa-sign-in
 										span Login
+				- }else{
+					.navbar-end
+						.navbar-item
+							.field.is-grouped
+								p.control
+									a.bd-tw-button.button(target='_blank', href='/mypage')
+										span.icon
+											i.fa.fa-user-o(aria-hidden='true')
+										span
+											| #{username}
+								a(href='/logout')
+									p.control
+											button.bd-tw-button.button
+												span.icon
+													i.fa.fa-sign-out(aria-hidden='true')
+												span
+													| Logout
 				- }
