@@ -70,20 +70,14 @@ const addQuiz = (id, account, info, tags) => {
 	});
 	return DBSUCCESS;
 };
-const getUID = email => {
-	return DB.query(`SELECT * FROM account WHERE email='${email}'`, (err, result) => {
-		if (err) return DBERROR;
-		return result[0].uid;
-	});
-};
 const getToken = email => {
-	return DB.query(`SELECT * FROM account WHERE email='${email}'`, (err, result) => {
+	return DB.query(`SELECT * FROM account WHERE email=${DB.escape(email)}`, (err, result) => {
 		if (err) return DBERROR;
 		return result[0].token;
 	});
 };
 const setToken = (email, token) => {
-	return DB.query(`UPDATE account SET token='${token}' WHERE email='${email}'`, (err, result) => {
+	return DB.query(`UPDATE account SET token='${token}' WHERE email=${DB.escape(email)}`, (err, result) => {
 		if (err) return DBERROR;
 		return DBSUCCESS;
 	});
@@ -265,7 +259,62 @@ app.post('/make', (req, res) => {
 app.get('/play', (req, res) => {
 	res.render('play', {});
 });
-const server = require('https').createServer({
+const HTTPS = require('https');
+const server = HTTPS.createServer({
 	key: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/privkey.pem'),
 	cert: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/fullchain.pem'),
 }, app).listen(443);
+
+const WebSocketServer = HTTPS.createserver;
+const WebServer = require('https').createServer({
+	key: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/privkey.pem'),
+	cert: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/fullchain.pem'),
+}).listen(5782);
+let socket_server = new WebSocketServer({
+	httpServer: WebServer,
+	autoAcceptConnections: false
+});
+
+function UserClient(i, cli) {
+	this.id = i;
+	this.client = cli;
+	this.sendData = data => {
+		try {
+			this.client.sendUTF(JSON.stringify(data));
+		} catch (ex) {}
+	};
+}
+let clients = [];
+let id = 0;
+socket_server.on('request', request => {
+	if (request.origin.indexOf("quiztree.xyz") < 0) {
+		request.reject();
+		return;
+	}
+	let clientID = id++;
+	let connection = request.accept(null, request.origin);
+	clients[clientID] = new UserClient(clientID, connection);
+	connection.on('message', message => {
+		let data = JSON.parse(message.utf8Data);
+		switch (data.type) {
+			case "like":
+				DB.query(`UPDATE quizs SET likes = likes +1 WHERE id = ` + DB.escape(data.quizid));
+				DB.query('INSERT INTO quiz_log SET ?', {
+					email: data.email,
+					id: data.quizid,
+					type: 1
+				});
+				break;
+			case "likeuser":
+				DB.query(`UPDATE account SET likes = likes +1 WHERE email = ` + DB.escape(data.email));
+				DB.query('INSERT INTO SET ?', {
+					email: data.email,
+					id: data.quizid,
+					type: 2
+				});
+				break;
+			default:
+				break;
+		}
+	});
+});
