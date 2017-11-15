@@ -8,21 +8,16 @@ html(lang='ko')
 					.card
 						header.card-header
 							p.card-header-title
-								// 퀴즈 이름
 								| #{quiz.name}
 						.card-content
 							.content
-								// 퀴즈 설명
 								span.substance #{quiz.explan}
 								br
-								// 카테고리
 								- for(tag in quiz.tags){
 									a.tag.is-light(href=`/tags/${tags[tag]}`) #{tags[tag]}
 								- }
 								br
-								// 올린시간
-								time(datetime=`${quiz.time}`) #{quiz.k_time}
-								// 만든 사람
+								time() #{quiz.time}
 								span.author
 									a #{quiz.auther}
 							footer.card-footer
