@@ -153,7 +153,8 @@ mailer.extend(app, {
 app.get('/', (req, res) => {
 	res.render('index', {
 		usermsg: ifIsContainReturnUserMsg(req),
-		isLogin: isLogin(req)
+		isLogin: isLogin(req),
+		username: req.session.username
 	});
 });
 app.get('/login', (req, res) => {
@@ -257,7 +258,9 @@ app.post('/make', (req, res) => {
 	res.redirect(URL('/make'));
 });
 app.get('/play', (req, res) => {
-	res.render('play', {});
+	if (isLogin(req)) {
+		res.render('play', {});
+	} else res.redirect('/login');
 });
 const HTTPS = require('https');
 const server = HTTPS.createServer({
@@ -265,7 +268,7 @@ const server = HTTPS.createServer({
 	cert: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/fullchain.pem'),
 }, app).listen(443);
 
-const WebSocketServer = HTTPS.createserver;
+const WebSocketServer = require('websocket').server;
 const WebServer = require('https').createServer({
 	key: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/privkey.pem'),
 	cert: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/fullchain.pem'),
@@ -296,25 +299,39 @@ socket_server.on('request', request => {
 	clients[clientID] = new UserClient(clientID, connection);
 	connection.on('message', message => {
 		let data = JSON.parse(message.utf8Data);
-		switch (data.type) {
-			case "like":
-				DB.query(`UPDATE quizs SET likes = likes +1 WHERE id = ` + DB.escape(data.quizid));
-				DB.query('INSERT INTO quiz_log SET ?', {
-					email: data.email,
-					id: data.quizid,
-					type: 1
-				});
-				break;
-			case "likeuser":
-				DB.query(`UPDATE account SET likes = likes +1 WHERE email = ` + DB.escape(data.email));
-				DB.query('INSERT INTO SET ?', {
-					email: data.email,
-					id: data.quizid,
-					type: 2
-				});
-				break;
-			default:
-				break;
+		if (equalToken(data.token)) {
+			switch (data.type) {
+				case "like":
+					DB.query(`UPDATE quizs SET likes = likes +1 WHERE id = ` + DB.escape(data.quizid));
+					DB.query('INSERT INTO quiz_log SET ?', {
+						email: data.email,
+						id: data.quizid
+					});
+					break;
+				case "likeuser":
+					DB.query(`UPDATE account SET likes = likes +1 WHERE email = ` + DB.escape(data.targetemail));
+					DB.query('INSERT INTO userlike_log SET ?', {
+						email: data.email,
+						target: data.targetemail
+					});
+					break;
+				case "rmlike":
+					DB.query(`UPDATE quizs SET likes = likes - 1 WHERE id = ` + DB.escape(data.quizid));
+					DB.query('DELETE FROM quiz_log WHERE ?', {
+						email: data.email,
+						id: data.quizid
+					});
+					break;
+				case "rmuser":
+					DB.query(`UPDATE account SET likes = likes +1 WHERE email = ` + DB.escape(data.email));
+					DB.query('DELETE FROM  ?', {
+						email: data.email,
+						target: data.targetemail
+					});
+					break;
+				default:
+					break;
+			}
 		}
 	});
 });
