@@ -263,7 +263,7 @@ app.get('/play/:id', (req, res) => {
 		res.render('play', {});
 	} else res.redirect('/login');
 });
-app.pos('/search', (req, res) => {
+app.post('/search', (req, res) => {
 	if (isLogin(req)) {
 		res.redirect(URL('/search/' + req.body.word));
 	} else res.redirect('/login');
