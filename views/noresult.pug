@@ -1,0 +1,69 @@
+doctype html
+html(lang='ko')
+	head
+		meta(charset='UTF-8')
+		meta(name='viewport', content='width=device-width, initial-scale=1.0')
+		meta(http-equiv='X-UA-Compatible', content='ie=edge')
+		link(rel='shortcut icon', href='./img/favicon.ico', type='image/x-icon')
+		link(rel='icon', href='./img/favicon.ico', type='image/x-icon')
+		link(rel='stylesheet', href='./css/font-awesome/css/font-awesome.min.css')
+		link(rel='stylesheet', href='./css/font.css')
+		link(rel='stylesheet', href='./css/result.css')
+		link(rel='stylesheet', href='./css/bulma.css')
+		title QuizTree
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
+		style.
+			.container {
+			height: 90vh;
+			}
+			.wrapper {
+			height: 70%;
+			}
+		script(type='text/javascript').
+			document.addEventListener('DOMContentLoaded', function () {
+			var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+			if ($navbarBurgers.length > 0) {
+			$navbarBurgers.forEach(function ($el) {
+			$el.addEventListener('click', function () {
+			var target = $el.dataset.target;
+			var $target = document.getElementById(target);
+			$el.classList.toggle('is-active');
+			$target.classList.toggle('is-active');
+			});
+			});
+			}
+			});
+	body
+		nav.navbar.is-transparent
+			.navbar-brand
+				a.navbar-item(href='./index.html')
+					img(src='./img/QuizTree@2.png', alt='QuizTree')
+					h1(style='margin-left:10px;font-size:24px') QuizTree
+				.navbar-burger.burger(data-target='navMenu')
+					span
+					span
+					span
+			#navMenu.navbar-menu
+				.navbar-start
+					input#searchbar.input(type='text', placeholder='Search')
+				.navbar-end
+						.navbar-item
+							.field.is-grouped
+								p.control
+									a.bd-tw-button.button(target='_blank', href='/mypage')
+										span.icon
+											i.fa.fa-user-o(aria-hidden='true')
+										span
+											| #{username}
+								a(href='/logout')
+									p.control
+											button.bd-tw-button.button
+												span.icon
+													i.fa.fa-sign-out(aria-hidden='true')
+												span
+													| Logout
+		.container
+			.wrapper
+				.titles
+					h1.title #{word}에 대한 검색 결과가 없습니다
+					span 다른 주제를 검색해보세요
