@@ -258,22 +258,22 @@ html(lang='ko')
 			h1.title #{title}
 			.wrapper
 				- for(n in [...Array(Object.keys(questions).length).keys()]){
-					.card(id=`card#{n}`)
+					.card(id=`card${n}`)
 						.des
 							p #{questions[n]}
 						.options
 							.column
-								button.custom-btn.button(type='submit', id=`ra#{n}`, onclick=`check('A',#{n}`)
+								button.custom-btn.button(type='submit', id=`ra${n}`, onclick=`check('A',${n}`)
 									i.fa.fa-check-circle-o(aria-hidden='true')
 									span #{radiotext[n].a}
-								button.custom-btn.button(type='submit', id=`rb#{n}`, onclick=`check('B',#{n}`)
+								button.custom-btn.button(type='submit', id=`rb${n}`, onclick=`check('B',${n}`)
 									i.fa.fa-check-circle-o(aria-hidden='true')
 									span #{radiotext[n].b}
 							.column
-								button.custom-btn.button(type='submit', id=`rc#{n}`, onclick=`check('C',#{n}`)
+								button.custom-btn.button(type='submit', id=`rc${n}`, onclick=`check('C',${n}`)
 									i.fa.fa-check-circle-o(aria-hidden='true')
 									span #{radiotext[n].c}
-								button.custom-btn.button(type='submit', id=`rd#{n}`, onclick=`check('D',#{n}`)
+								button.custom-btn.button(type='submit', id=`rd${n}`, onclick=`check('D',${n}`)
 									i.fa.fa-check-circle-o(aria-hidden='true')
 									span #{radiotext[n].d}
 				- }
