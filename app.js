@@ -40,7 +40,14 @@ const createQuery = (query, params) => {
 	});
 };
 const getQuizListByAccount = email => {
-	return DB.query(`SELECT * quizs WHERE account = ${DB.escape(email)} ORDER BY timestp DESC LIMIT 0,9999`, (err, result) => {
+	return DB.query(`SELECT * quizes WHERE account = ${DB.escape(email)} ORDER BY timestp DESC LIMIT 0,9999`, (err, result) => {
+		if (err) return DBERROR;
+		if (result.length < 0) return DBNONRESULT;
+		return result;
+	});
+};
+const getQuizList = () => {
+	return DB.query(`SELECT * FROM quizes ORDER BY time DESC LIMIT 0,9999`, (err, result) => {
 		if (err) return DBERROR;
 		if (result.length < 0) return DBNONRESULT;
 		return result;
@@ -157,7 +164,8 @@ app.get('/', (req, res) => {
 		usermsg: ifIsContainReturnUserMsg(req),
 		isLogin: isLogin(req),
 		username: req.session.username,
-		token: req.session.token
+		token: req.session.token,
+		list:getQuizList()
 	});
 });
 app.get('/login', (req, res) => {
@@ -269,22 +277,23 @@ app.post('/search', (req, res) => {
 	} else res.redirect('/login');
 });
 app.get('/search/:key', (req, res) => {
+	const key = req.params.key;
 	if (req.session.search == DBNONRESULT) {
-		res.render('noresult',{
+		res.render('noresult', {
 			username: req.session.username,
-			word:req.params.key
+			word: key
 		});
 	}
+	const list = [];
 	if (!isLogin(req)) {
 		res.redirect('/login');
 	} else {
-		const list = [];
-		DB.query(`SELECT * FROM quizes WHERE title LIKE %${req.params.key}%`, (err, result) => {
-			DB.query(`SELECT * FROM tags WHERE tag LIKE %${req.params.key}%`, (err2, result2) => {
+		console.log(req.params);
+		DB.query(`SELECT * FROM quizes WHERE title LIKE %${key}%`, (err, result) => {
+			DB.query(`SELECT * FROM tags WHERE tag LIKE %${key}%`, (err2, result2) => {
 				if ((err && err2) || (result.length < 0 && result2.length < 0)) {
 					req.session.search = DBNONRESULT;
-					res.redirect(URL('/search'));
-				}else{
+				} else {
 					const f = result.length < 0 ? result2 : result;
 					const k = result2.length < 0 ? undefined : result2;
 					f.forEach(v => {
@@ -307,6 +316,13 @@ app.get('/search/:key', (req, res) => {
 					});
 				}
 			});
+		});
+	}
+	if (req.session.search === DBNONRESULT) {
+		res.redirect(URL('/search'));
+	} else {
+		res.render('result', {
+			list: list
 		});
 	}
 });
@@ -350,7 +366,7 @@ socket_server.on('request', request => {
 		if (equalToken(data.token)) {
 			switch (data.type) {
 				case "like":
-					DB.query(`UPDATE quizs SET likes = likes +1 WHERE id = ` + DB.escape(data.quizid));
+					DB.query(`UPDATE quizes SET likes = likes +1 WHERE id = ` + DB.escape(data.quizid));
 					DB.query('INSERT INTO quiz_log SET ?', {
 						email: data.email,
 						id: data.quizid
@@ -364,7 +380,7 @@ socket_server.on('request', request => {
 					});
 					break;
 				case "rmlike":
-					DB.query(`UPDATE quizs SET likes = likes - 1 WHERE id = ` + DB.escape(data.quizid));
+					DB.query(`UPDATE quizes SET likes = likes - 1 WHERE id = ` + DB.escape(data.quizid));
 					DB.query('DELETE FROM quiz_log WHERE ?', {
 						email: data.email,
 						id: data.quizid
