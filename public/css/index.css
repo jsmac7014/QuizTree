@@ -9,7 +9,7 @@ body {
 .navbar-start input {
     width: 400px;
 }
-
+.tag{ margin:3px }
 .container {
     width: 100%;
     display: flex;
