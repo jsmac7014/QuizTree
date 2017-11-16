@@ -154,7 +154,8 @@ app.get('/', (req, res) => {
 	res.render('index', {
 		usermsg: ifIsContainReturnUserMsg(req),
 		isLogin: isLogin(req),
-		username: req.session.username
+		username: req.session.username,
+		token: req.session.token
 	});
 });
 app.get('/login', (req, res) => {
@@ -165,8 +166,6 @@ app.get('/login', (req, res) => {
 });
 app.post('/login', (req, res) => {
 	DB.query(`SELECT * FROM account WHERE email = ${DB.escape(req.body.email)} AND password = '${sha512(req.body.password+DBPassword)}'`, (err, result) => {
-		console.log(`SELECT * FROM account WHERE email = ${DB.escape(req.body.email)} AND password = '${req.body.email}'`);
-		console.log(err);
 		if (err !== null) {
 			req.session.usermsg = '로그인에 실패하였습니다.';
 		}
@@ -178,8 +177,6 @@ app.post('/login', (req, res) => {
 		} else {
 			const token = sha512('' + req.body.email + new Date().getMilliseconds() + new Date().getTime());
 			DB.query(`UPDATE account SET token='${token}' WHERE email=${DB.escape(req.body.email)}`, (err2, result2) => {
-				console.log(err2);
-				console.log(result2);
 				if (err !== null) {
 					req.session.usermsg = '로그인에 실패하였습니다.';
 				}
@@ -218,7 +215,8 @@ app.get('/register', (req, res) => {
 app.get('/mypage', (req, res) => {
 	if (isLogin(req)) res.render('mypage', {
 		usermsg: ifIsContainReturnUserMsg(req),
-		username: req.session.username
+		username: req.session.username,
+		token: req.session.token
 	});
 	else res.redirect('/login');
 });
@@ -228,7 +226,7 @@ app.get('/email', (req, res) => {
 	} else res.redirect('/?msg=err');
 });
 app.get('/make', (req, res) => {
-	if (isLogin(req)) res.render('make', {});
+	if (isLogin(req)) res.render('make', {token: req.session.token});
 	else res.redirect('/login');
 });
 app.get('/logout', (req, res) => {
@@ -253,7 +251,8 @@ app.post('/make', (req, res) => {
 		}, req.body),
 		questions: mapRange(req.body.quizs, (v, data) => {
 			return data['questions' + v];
-		}, req.body)
+		}, req.body),
+		time:new Date().getTime()
 	}, req.body.tags.split('#')) == DBERROR ? '퀴즈생성에 실패하였습니다.' : '';
 	res.redirect(URL('/make'));
 });
