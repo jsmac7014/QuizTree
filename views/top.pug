@@ -1,4 +1,4 @@
-mixin top(title,css,isLogin,username)
+mixin top(title,css,isLogin,username,token)
 	include msg
 	head
 		meta(charset='UTF-8')
@@ -12,21 +12,7 @@ mixin top(title,css,isLogin,username)
 		link(rel='stylesheet', href='./css/font.css')
 		title #{title}
 		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
-		script(type='text/javascript').
-			document.addEventListener('DOMContentLoaded', function () {
-			var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
-			if ($navbarBurgers.length > 0) {
-			$navbarBurgers.forEach(function ($el) {
-			$el.addEventListener('click', function () {
-			var target = $el.dataset.target;
-			var $target = document.getElementById(target);
-			$el.classList.toggle('is-active');
-			$target.classList.toggle
-			('is-active');
-			});
-			});
-			}
-			});
+		+dom()
 	body
 		nav.navbar.is-transparent
 			.navbar-brand
@@ -74,3 +60,18 @@ mixin top(title,css,isLogin,username)
 												span
 													| Logout
 				- }
+mixin dom()
+	script(type='text/javascript').
+		document.addEventListener('DOMContentLoaded', function () {
+		var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+		if ($navbarBurgers.length > 0) {
+		$navbarBurgers.forEach(function ($el) {
+		$el.addEventListener('click', function () {
+		var target = $el.dataset.target;
+		var $target = document.getElementById(target);
+		$el.classList.toggle('is-active');
+		$target.classList.toggle('is-active');
+		});
+		});
+		}
+		});
