@@ -1,30 +1,21 @@
 include top
+include card
 doctype html
 html(lang='ko')
 	+top('QuizTree','index',isLogin,username)
+		script.
+			const webSocket = new WebSocket('wss://quiztree.xyz:5782');
+			webSocket.onopen = event => {};
+			function likeBtn(id) {
+			webSocket.send(JSON.stringify({
+			id:id,
+			token:`${token}`
+			}));
+			}
 		.container
 			.wrapper
 				- for(quiz in list){
-					.card
-						header.card-header
-							p.card-header-title
-								| #{quiz.name}
-						.card-content
-							.content
-								span.substance #{quiz.explan}
-								br
-								- for(tag in quiz.tags){
-									a.tag.is-light(href=`/tags/${tags[tag]}`) #{tags[tag]}
-								- }
-								br
-								time() #{quiz.time}
-								span.author
-									a #{quiz.auther}
-							footer.card-footer
-								a.card-footer-item(href=`/play/${quiz.id}`) Play
-								a.card-footer-item(href='#' onclick=`like('${quiz.id}')`)
-									i.fa.fa-thumbs-o-up(aria-hidden='true')
-									| Like
+					+card(quiz.name, quiz.explan, quiz.tags, quiz.time, quiz.auther, quiz.id)
 				- }
 			a(href="/create/")#addBtn.button
 				i.fa.fa-plus(aria-hidden='true')
