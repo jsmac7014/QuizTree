@@ -5,15 +5,19 @@ html(lang='ko')
 	+top('QuizTree','index',isLogin,username)
 	script.
 		var webSocket = new WebSocket('wss://quiztree.xyz:5782');
-		webSocket.onopen = event => {console.log(event);};
+		webSocket.onopen = event => {webSocket.send(JSON.stringify({
+		id:'rkhSasD1f',
+		type:'like',
+		token:'#{token}'
+		}));};
 		webSocket.onerror = event =>{console.log(event);};
 		function likeBtn(id) {
 		console.log(id);
 		webSocket.send(JSON.stringify({
-			id:id,
-			type:'like',
-			token:'#{token}'
-			}));
+		id:id,
+		type:'like',
+		token:'#{token}'
+		}));
 		}
 	.container
 		.wrapper
