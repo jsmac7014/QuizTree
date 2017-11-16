@@ -1,0 +1,21 @@
+mixin card(name, explan, tags, time, auther, id)
+	.card
+		header.card-header
+			p.card-header-title
+				| #{name}
+		.card-content
+			.content
+				span.substance #{explan}
+				br
+				- for(tag in tags){
+					a.tag.is-light(href=`/tags/${tags[tag]}`) #{tags[tag]}
+				- }
+				br
+				time() #{time}
+				span.author
+					a #{auther}
+			footer.card-footer
+				a.card-footer-item(href=`/play/${id}`) Play
+				a.card-footer-item(href='#' onclick=`likeBtn('${id}')`)
+					i.fa.fa-thumbs-o-up(aria-hidden='true')
+					| Like
