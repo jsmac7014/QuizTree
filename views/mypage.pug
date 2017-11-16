@@ -1,4 +1,5 @@
 include msg
+include top
 doctype html
 html(lang='ko')
 	head
@@ -14,21 +15,17 @@ html(lang='ko')
 		link(rel='stylesheet', href='./css/flexboxgrid.min.css')
 		title My Page
 		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
-		script(type='text/javascript').
-			document.addEventListener('DOMContentLoaded', function () {
-			var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
-			if ($navbarBurgers.length > 0) {
-			$navbarBurgers.forEach(function ($el) {
-			$el.addEventListener('click', function () {
-			var target = $el.dataset.target;
-			var $target = document.getElementById(target);
-			$el.classList.toggle('is-active');
-			$target.classList.toggle('is-active');
-			});
-			});
-			}
-			});
+		+dom(token)
 	body
+		script.
+			const webSocket = new WebSocket('wss://quiztree.xyz:5782');
+			webSocket.onopen = event => {};
+			function likeBtn(id) {
+			webSocket.send(JSON.stringify({
+			id:id,
+			token:`${token}`
+			}));
+			}
 		nav.navbar.is-transparent
 			.navbar-brand
 				a.navbar-item(href='/')
@@ -74,30 +71,6 @@ html(lang='ko')
 									span 팔로잉
 				.posts
 					- for(quiz in list){
-						.card
-							header.card-header
-								p.card-header-title
-									// 퀴즈 이름
-									| #{quiz.name}
-							.card-content
-								.content
-									// 퀴즈 설명
-									span.substance #{quiz.explan}
-									br
-									// 카테고리
-									- for(tag in quiz.tags){
-										a.tag.is-light(href=`/tags/${tags[tag]}`) #{tags[tag]}
-									- }
-									br
-									// 올린시간
-									time #{quiz.k_time}
-									// 만든 사람
-									span.author
-										a #{quiz.auther}
-								footer.card-footer
-									a.card-footer-item(href=`/play/${quiz.id}`) Play
-									a.card-footer-item(href='#' onclick=`like('${quiz.id}')`)
-										i.fa.fa-thumbs-o-up(aria-hidden='true')
-										| Like
+						+card(quiz.name, quiz.explan, quiz.tags, quiz.time, quiz.auther, quiz.id)
 					- }
 		+msg_alert(usermsg)
