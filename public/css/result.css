@@ -1,0 +1,58 @@
+.navbar-start {
+    padding: 8px 16px;
+}
+
+.navbar-start input {
+    width: 400px;
+}
+.container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+.titles{
+    height: 80px;
+}
+.titles span{
+    font-size: 20px;
+}
+.title{
+    margin-bottom: 10px!important;
+}
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50px;
+    width: 100%;
+    padding: 20px;
+}
+.cards{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+.card{
+    margin: 10px;
+}
+.card-content{
+    padding: 0px!important;
+}
+.content{
+    margin-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.card-footer-item i.fa {
+    margin-right: 10px;
+}
