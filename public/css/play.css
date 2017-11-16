@@ -64,6 +64,31 @@ body{
 .custom-btn:hover{
     border-color: #36afff;
 }
+.wrong{
+    color: red;
+    border: 1px solid red;
+}
+.wrong .custom-btn{
+    border: 1px solid red;
+}
+.wrong .custom-btn i{
+    color: red;
+}
+.correct{
+    color: #20b25f;
+    border: 1px solid #20b25f;
+}
+.correct .custom-btn{
+    border: 1px solid #20b25f;
+}
+.correct .custom-btn i{
+    color: #20b25f;
+}
+.check{
+    position: relative;
+    top: 10px;
+    text-align: center;
+}
 
 @media screen and (max-width:420px){
     .card{
