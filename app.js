@@ -54,11 +54,13 @@ const addAccount = (email, password, nick, token) => {
 		token: token
 	});
 };
-const addQuiz = (id, account, info, tags) => {
+const addQuiz = (id, account, title, info, tags) => {
 	if (createQuery(`INSERT INTO quizes SET ?`, {
 			id: id,
 			account: account,
-			information: JSON.stringify(info)
+			title: title,
+			information: JSON.stringify(info),
+			time: new Date().getTime()
 		}) == DBERROR) return DBERROR;
 	tags.forEach(v => {
 		if (v !== '') {
@@ -226,7 +228,9 @@ app.get('/email', (req, res) => {
 	} else res.redirect('/?msg=err');
 });
 app.get('/make', (req, res) => {
-	if (isLogin(req)) res.render('make', {token: req.session.token});
+	if (isLogin(req)) res.render('make', {
+		token: req.session.token
+	});
 	else res.redirect('/login');
 });
 app.get('/logout', (req, res) => {
@@ -235,8 +239,7 @@ app.get('/logout', (req, res) => {
 	res.redirect('back');
 });
 app.post('/make', (req, res) => {
-	req.session.usermsg = addQuiz(shortID.generate(), req.session.email, {
-		title: req.body.title,
+	req.session.usermsg = addQuiz(shortID.generate(), req.session.email, req.body.title, {
 		info: req.body.info,
 		radio: mapRange(parseInt(req.body.quizs), (v, data) => {
 			return data['answerradio' + v];
@@ -251,15 +254,61 @@ app.post('/make', (req, res) => {
 		}, req.body),
 		questions: mapRange(req.body.quizs, (v, data) => {
 			return data['questions' + v];
-		}, req.body),
-		time:new Date().getTime()
+		}, req.body)
 	}, req.body.tags.split('#')) == DBERROR ? '퀴즈생성에 실패하였습니다.' : '';
 	res.redirect(URL('/make'));
 });
-app.get('/play', (req, res) => {
+app.get('/play/:id', (req, res) => {
 	if (isLogin(req)) {
 		res.render('play', {});
 	} else res.redirect('/login');
+});
+app.pos('/search', (req, res) => {
+	if (isLogin(req)) {
+		res.redirect(URL('/search/' + req.body.word));
+	} else res.redirect('/login');
+});
+app.get('/search/:key', (req, res) => {
+	if(req.session.search ==DBERROR){
+
+	}
+	if (!isLogin(req)) {
+		res.redirect('/login');
+	} else {
+		const list = [];
+		DB.query(`SELECT * FROM quizes WHERE title LIKE %${req.params.key}%`, (err, result) => {
+			DB.query(`SELECT * FROM tags WHERE tag LIKE %${req.params.key}%`, (err2, result2) => {
+				if (err && err2) {
+					req.session.search = DBERROR;
+					res.redirect(URL('/search'));
+				}
+				if (result.length < 0 && result2.length < 0) {
+					req.session.search = DBNONRESULT;
+					res.redirect(URL('/search'));
+				}
+				const f = result.length < 0 ? result2 : result;
+				const k = result2.length < 0 ? undefined : result2;
+				f.forEach(v => {
+					list[v.id] = v;
+					if (k !== undefined) {
+						if (k.indexOf(v.id) > -1) {
+							k.remove(v.id);
+						}
+						k.forEach(v2 => {
+							DB.query(`SELECT * FROM quizes WHERE id = ${v2.id}`, (err3, result3) => {
+								if (!(err3 || result3.length < 0)) {
+									if (result3.indexOf(v2.id)) list[v2.id] = v2;
+								}
+							});
+						});
+					}
+				});
+				res.render('result', {
+					list: list
+				});
+			});
+		});
+	}
 });
 const HTTPS = require('https');
 const server = HTTPS.createServer({
@@ -326,6 +375,13 @@ socket_server.on('request', request => {
 					DB.query('DELETE FROM  ?', {
 						email: data.email,
 						target: data.targetemail
+					});
+					break;
+				case "chat":
+					DB.query('INSERT INTO chat SET ?', {
+						email: data.email,
+						target: data.targetemail,
+						msg: data.msg
 					});
 					break;
 				default:
