@@ -263,17 +263,17 @@ html(lang='ko')
 							p #{questions[n]}
 						.options
 							.column
-								button.custom-btn.button(type='submit', id=`ra#{n}`)
+								button.custom-btn.button(type='submit', id=`ra#{n}`, onclick=`check('A',#{n}`)
 									i.fa.fa-check-circle-o(aria-hidden='true')
 									span #{radiotext[n].a}
-								button.custom-btn.button(type='submit', id=`rb#{n}`)
+								button.custom-btn.button(type='submit', id=`rb#{n}`, onclick=`check('B',#{n}`)
 									i.fa.fa-check-circle-o(aria-hidden='true')
 									span #{radiotext[n].b}
 							.column
-								button.custom-btn.button(type='submit', id=`rc#{n}`)
+								button.custom-btn.button(type='submit', id=`rc#{n}`, onclick=`check('C',#{n}`)
 									i.fa.fa-check-circle-o(aria-hidden='true')
 									span #{radiotext[n].c}
-								button.custom-btn.button(type='submit', id=`rd#{n}`)
+								button.custom-btn.button(type='submit', id=`rd#{n}`, onclick=`check('D',#{n}`)
 									i.fa.fa-check-circle-o(aria-hidden='true')
 									span #{radiotext[n].d}
 				- }
