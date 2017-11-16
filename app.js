@@ -322,7 +322,7 @@ socket_server.on('request', request => {
 					});
 					break;
 				case "rmuser":
-					DB.query(`UPDATE account SET likes = likes +1 WHERE email = ` + DB.escape(data.email));
+					DB.query(`UPDATE account SET likes = likes - 1 WHERE email = ` + DB.escape(data.email));
 					DB.query('DELETE FROM  ?', {
 						email: data.email,
 						target: data.targetemail
