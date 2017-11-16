@@ -5,6 +5,7 @@ const Path = require('path');
 const fs = require('fs');
 const Crypto = require('crypto');
 const Logger = require('morgan');
+const Sync = require('sync');
 const Striptags = require('striptags');
 const CookieParser = require('cookie-parser');
 const BodyParser = require('body-parser');
@@ -41,13 +42,6 @@ const createQuery = (query, params) => {
 };
 const getQuizListByAccount = email => {
 	return DB.query(`SELECT * quizes WHERE account = ${DB.escape(email)} ORDER BY timestp DESC LIMIT 0,9999`, (err, result) => {
-		if (err) return DBERROR;
-		if (result.length < 0) return DBNONRESULT;
-		return result;
-	});
-};
-const getQuizList = () => {
-	return DB.query(`SELECT * FROM quizes ORDER BY time DESC LIMIT 0,9999`, (err, result) => {
 		if (err) return DBERROR;
 		if (result.length < 0) return DBNONRESULT;
 		return result;
@@ -119,6 +113,51 @@ const mapRange = (num, callback, callbackdata) => {
 		return callback(v, callbackdata);
 	});
 };
+const search_middle = (req, res, next) => {
+	const key = req.params.key;
+	req.middlelist = {};
+	Sync(() => {
+		DB.query(`SELECT * FROM quizes WHERE title LIKE ${DB.escape('%'+key+'%')}`, (err, result) => {
+			DB.query(`SELECT * FROM tags WHERE tag LIKE ${DB.escape('%'+key+'%')}`, (err2, result2) => {
+				if ((err && err2) || (result.length < 0 && result2.length < 0)) {
+					next();
+				} else {
+					Sync(() => {
+						result.forEach(v => {
+							req.middlelist[v.id] = v;
+						});
+						result2.forEach(v2 => {
+							DB.query(`SELECT * FROM quizes WHERE id = '${v2.id}'`, (err3, result3) => {
+								if (!(err3 || result3.length === 0)) req.middlelist[result3[0].id] = result3[0];
+							});
+						});
+						next();
+					});
+				}
+			});
+		});
+	});
+};
+const tag_middle = (req, res, next) => {
+	const key = req.params.id;
+	req.middlelist = {};
+	Sync(() => {
+		DB.query(`SELECT * FROM tags WHERE tag = ${DB.escape(key)}`, (err, result) => {
+			if (err || result.length < 0) next();
+			else {
+				Sync(() => {
+					result.forEach(v => {
+						req.middlelist[v.id] = v;
+						DB.query(`SELECT * FROM quizes WHERE id = '${v.id}'`, (err3, result3) => {
+							if (!(err3 || result3.length === 0)) req.middlelist[result3[0].id] = result3[0];
+						});
+					});
+					next();
+				});
+			}
+		});
+	});
+};
 app.set('trust proxy', true);
 app.set('views', Path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -160,13 +199,24 @@ mailer.extend(app, {
 	auth: AUTH
 });
 app.get('/', (req, res) => {
-	res.render('index', {
-		usermsg: ifIsContainReturnUserMsg(req),
-		isLogin: isLogin(req),
-		username: req.session.username,
-		token: req.session.token,
-		list:getQuizList()
+	DB.query(`SELECT * FROM quizes ORDER BY time DESC LIMIT 0,9999`, (err, result) => {
+		if (err || result.length < 0) res.render('index', {
+			usermsg: ifIsContainReturnUserMsg(req),
+			isLogin: isLogin(req),
+			username: req.session.username,
+			token: req.session.token,
+			list: result
+		});
+		else
+			res.render('index', {
+				usermsg: ifIsContainReturnUserMsg(req),
+				isLogin: isLogin(req),
+				username: req.session.username,
+				token: req.session.token,
+				list: result
+			});
 	});
+
 });
 app.get('/login', (req, res) => {
 	if (!isLogin(req)) res.render('login', {
@@ -176,23 +226,15 @@ app.get('/login', (req, res) => {
 });
 app.post('/login', (req, res) => {
 	DB.query(`SELECT * FROM account WHERE email = ${DB.escape(req.body.email)} AND password = '${sha512(req.body.password+DBPassword)}'`, (err, result) => {
-		if (err !== null) {
-			req.session.usermsg = '로그인에 실패하였습니다.';
-		}
-		if (result.length === 0) {
-			req.session.usermsg = '사용자 정보가 잘못되었습니다.';
-		}
-		if (req.session.usermsg !== '') {
-			res.redirect(URL('/login'));
-		} else {
+		if (err !== null) req.session.usermsg = '로그인에 실패하였습니다.';
+		if (result.length === 0) req.session.usermsg = '사용자 정보가 잘못되었습니다.';
+		if (req.session.usermsg !== '') res.redirect(URL('/login'));
+		else {
 			const token = sha512('' + req.body.email + new Date().getMilliseconds() + new Date().getTime());
 			DB.query(`UPDATE account SET token='${token}' WHERE email=${DB.escape(req.body.email)}`, (err2, result2) => {
-				if (err !== null) {
-					req.session.usermsg = '로그인에 실패하였습니다.';
-				}
-				if (req.session.usermsg !== '') {
-					res.redirect(URL('/login'));
-				} else {
+				if (err !== null) req.session.usermsg = '로그인에 실패하였습니다.';
+				if (req.session.usermsg !== '') res.redirect(URL('/login'));
+				else {
 					req.session.token = token;
 					req.session.username = result[0].nick;
 					req.session.email = req.body.email;
@@ -268,92 +310,83 @@ app.post('/make', (req, res) => {
 });
 app.get('/play/:id', (req, res) => {
 	if (isLogin(req)) {
-		res.render('play', {});
+		DB.query(`SELECT * FROM quizes WHERE id = ${DB.escape(req.params.id)}`, (err, result) => {
+			if (err || result.length === 0) res.redirect(URL('/'));
+			else {
+				result[0].Information = JSON.parse(result[0].Information);
+				const answer = result[0].Information.radio.map(v=>{return sha512(v);});
+				res.render('play', {
+					title: result[0].title,
+					token: req.session.token,
+					questions: result[0].Information.questions,
+					radiotext: result[0].Information.radioText,
+					answers: answer
+				});
+			}
+		});
 	} else res.redirect('/login');
 });
 app.post('/search', (req, res) => {
-	if (isLogin(req)) {
-		res.redirect(URL('/search/' + req.body.word));
-	} else res.redirect('/login');
+	if (isLogin(req)) res.redirect(URL('/search/' + req.body.word));
+	else res.redirect('/login');
 });
-app.get('/search/:key', (req, res) => {
+
+app.get('/tags/:tag', tag_middle, (req, res) => {
+	console.log(req.middlelist);
+	if (Object.keys(req.middlelist).length === 0) res.redirect('/');
+	else if (!isLogin(req)) res.redirect('/login');
+	else res.render('result', {
+		list: req.middlelist,
+		count: Object.keys(req.middlelist).length,
+		word: req.params.tag
+	});
+});
+app.get('/search/:key', search_middle, (req, res) => {
 	const key = req.params.key;
-	if (req.session.search == DBNONRESULT) {
-		res.render('noresult', {
-			username: req.session.username,
-			word: key
-		});
-	}
-	const list = [];
-	if (!isLogin(req)) {
-		res.redirect('/login');
-	} else {
-		console.log(req.params);
-		DB.query(`SELECT * FROM quizes WHERE title LIKE %${key}%`, (err, result) => {
-			DB.query(`SELECT * FROM tags WHERE tag LIKE %${key}%`, (err2, result2) => {
-				if ((err && err2) || (result.length < 0 && result2.length < 0)) {
-					req.session.search = DBNONRESULT;
-				} else {
-					const f = result.length < 0 ? result2 : result;
-					const k = result2.length < 0 ? undefined : result2;
-					f.forEach(v => {
-						list[v.id] = v;
-						if (k !== undefined) {
-							if (k.indexOf(v.id) > -1) {
-								k.remove(v.id);
-							}
-							k.forEach(v2 => {
-								DB.query(`SELECT * FROM quizes WHERE id = ${v2.id}`, (err3, result3) => {
-									if (!(err3 || result3.length < 0)) {
-										if (result3.indexOf(v2.id)) list[v2.id] = v2;
-									}
-								});
-							});
-						}
-					});
-					res.render('result', {
-						list: list
-					});
-				}
-			});
-		});
-	}
-	if (req.session.search === DBNONRESULT) {
-		res.redirect(URL('/search'));
-	} else {
-		res.render('result', {
-			list: list
-		});
-	}
+	console.log(req.middlelist);
+	if (Object.keys(req.middlelist).length === 0) res.render('noresult', {
+		username: req.session.username,
+		word: key
+	});
+	else if (!isLogin(req)) res.redirect('/login');
+	else res.render('result', {
+		list: req.middlelist,
+		count: Object.keys(req.middlelist).length,
+		word: key
+	});
 });
 const HTTPS = require('https');
-const server = HTTPS.createServer({
-	key: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/privkey.pem'),
-	cert: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/fullchain.pem'),
-}, app).listen(443);
-
 const WebSocketServer = require('websocket').server;
-const WebServer = require('https').createServer({
+const options = {
 	key: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/privkey.pem'),
 	cert: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/fullchain.pem'),
-}).listen(5782);
+};
+const WebServer = HTTPS.createServer(options).listen(5782, (req, res) => {
+	console.log('WebSocket server is working on 5782 Port');
+});
 let socket_server = new WebSocketServer({
 	httpServer: WebServer,
-	autoAcceptConnections: false
+	autoAcceptConnections: true
 });
 
 function UserClient(i, cli) {
 	this.id = i;
 	this.client = cli;
 	this.sendData = data => {
+		console.log(data);
 		try {
 			this.client.sendUTF(JSON.stringify(data));
-		} catch (ex) {}
+		} catch (ex) {
+			throw ex;
+		}
 	};
 }
 let clients = [];
 let id = 0;
 socket_server.on('request', request => {
+	let fd = fs.openSync('logs/' + new Date().getTime(), 'a+', 0666);
+	fs.writeSync(fd, JSON.stringify(request));
+	fs.closeSync(fd);
 	if (request.origin.indexOf("quiztree.xyz") < 0) {
 		request.reject();
 		return;
@@ -362,7 +395,8 @@ socket_server.on('request', request => {
 	let connection = request.accept(null, request.origin);
 	clients[clientID] = new UserClient(clientID, connection);
 	connection.on('message', message => {
-		let data = JSON.parse(message.utf8Data);
+		const data = JSON.parse(message.utf8Data);
+		console.log(data);
 		if (equalToken(data.token)) {
 			switch (data.type) {
 				case "like":
@@ -406,3 +440,4 @@ socket_server.on('request', request => {
 		}
 	});
 });
+const server = HTTPS.createServer(options, app).listen(443);
