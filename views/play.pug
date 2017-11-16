@@ -4,5 +4,43 @@ html(lang='ko')
 		meta(charset='UTF-8')
 		meta(name='viewport', content='width=device-width, initial-scale=1.0')
 		meta(http-equiv='X-UA-Compatible', content='ie=edge')
+		link(rel='shortcut icon', href='./img/favicon.ico', type='image/x-icon')
+		link(rel='icon', href='./img/favicon.ico', type='image/x-icon')
+		link(rel='stylesheet', href='./css/font-awesome/css/font-awesome.min.css')
+		link(rel='stylesheet', href='./css/font/stylesheet.css')
+		link(rel='stylesheet', href='./css/bulma.css')
+		link(rel='stylesheet', href='./css/play.css')
 		title Play
+		script.
+			const webSocket = new WebSocket('wss://quiztree.xyz:5782');
+			webSocket.onopen = event => {};
+			function likeBtn(id) {
+			webSocket.send(JSON.stringify({
+			id:id,
+			token:`${token}`
+			}));
+			}
 	body
+		.container
+			h1.title #{title}
+			.wrapper
+				- for(quiz in list){
+					.card
+						.des
+							p #{quiz.info}
+						.options
+							.column
+								button.custom-btn.button(type='submit')
+									i.fa.fa-check-circle-o(aria-hidden='true')
+									span Option A
+								button.custom-btn.button(type='submit')
+									i.fa.fa-check-circle-o(aria-hidden='true')
+									span Option B
+							.column
+								button.custom-btn.button(type='submit')
+									i.fa.fa-check-circle-o(aria-hidden='true')
+									span Option C
+								button.custom-btn.button(type='submit')
+									i.fa.fa-check-circle-o(aria-hidden='true')
+									span Option D
+				- }
