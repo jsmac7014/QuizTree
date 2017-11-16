@@ -1,3 +1,4 @@
+include card
 doctype html
 html(lang='ko')
 	head
@@ -16,7 +17,7 @@ html(lang='ko')
 		nav.navbar.is-transparent
 			.navbar-brand
 				a.navbar-item(href='../')
-					img(src='../img/QuizTree@2.png', alt='QuizTree')
+					img(src='../../img/QuizTree@2.png', alt='QuizTree')
 					h1(style='margin-left:10px;font-size:24px') QuizTree
 				.navbar-burger.burger(data-target='navMenu')
 					span
@@ -24,15 +25,17 @@ html(lang='ko')
 					span
 			#navMenu.navbar-menu
 				.navbar-start
-					input#searchbar.input(type='text', placeholder='Search',name='word')
+					form(method='post', action='../search')
+						input#searchbar.input(type='text', placeholder='Search',name='word')
 		.container
 			script.
 				const webSocket = new WebSocket('wss://quiztree.xyz:5782');
 				webSocket.onopen = event => {};
+				webSocket.onerror = event =>{console.log(event);};
 				function likeBtn(id) {
 				webSocket.send(JSON.stringify({
 				id:id,
-				token:`${token}`
+				token:'#{token}'
 				}));
 				}
 			.wrapper
@@ -40,6 +43,12 @@ html(lang='ko')
 					h1.title #{word}에 대한 검색 결과
 					span #{count}개
 				.cards
+					- function date_ko(date) {
+					- date= new Date(date);
+					- return `${date.getFullYear()}/${date.getMonth()+1}/${date.getDay()} ${date.getHours()}:${date.getMinutes()}`;
+					- }
 					- for(quiz in list){
-						+card(quiz.name, quiz.explan, quiz.tags, quiz.time, quiz.auther, quiz.id)
+						- list[quiz].Information = JSON.parse(list[quiz].Information);
+						- list[quiz].time = date_ko(list[quiz].time);
+						+card(list[quiz].title, list[quiz].Information.info, list[quiz].tags, list[quiz].time, list[quiz].username, list[quiz].id)
 					- }
