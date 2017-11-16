@@ -26,7 +26,7 @@ mixin top(title,css,isLogin,username,token)
 			#navMenu.navbar-menu
 				.navbar-start
 					form(method='post', action='search')
-						input#searchbar.input(type='text', placeholder='Search')
+						input#searchbar.input(type='text', placeholder='Search',name='word')
 				- if(!isLogin){
 					.navbar-end
 						.navbar-item
