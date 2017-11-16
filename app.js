@@ -284,27 +284,28 @@ app.get('/search/:key', (req, res) => {
 				if ((err && err2) || (result.length < 0 && result2.length < 0)) {
 					req.session.search = DBNONRESULT;
 					res.redirect(URL('/search'));
-				}
-				const f = result.length < 0 ? result2 : result;
-				const k = result2.length < 0 ? undefined : result2;
-				f.forEach(v => {
-					list[v.id] = v;
-					if (k !== undefined) {
-						if (k.indexOf(v.id) > -1) {
-							k.remove(v.id);
-						}
-						k.forEach(v2 => {
-							DB.query(`SELECT * FROM quizes WHERE id = ${v2.id}`, (err3, result3) => {
-								if (!(err3 || result3.length < 0)) {
-									if (result3.indexOf(v2.id)) list[v2.id] = v2;
-								}
+				}else{
+					const f = result.length < 0 ? result2 : result;
+					const k = result2.length < 0 ? undefined : result2;
+					f.forEach(v => {
+						list[v.id] = v;
+						if (k !== undefined) {
+							if (k.indexOf(v.id) > -1) {
+								k.remove(v.id);
+							}
+							k.forEach(v2 => {
+								DB.query(`SELECT * FROM quizes WHERE id = ${v2.id}`, (err3, result3) => {
+									if (!(err3 || result3.length < 0)) {
+										if (result3.indexOf(v2.id)) list[v2.id] = v2;
+									}
+								});
 							});
-						});
-					}
-				});
-				res.render('result', {
-					list: list
-				});
+						}
+					});
+					res.render('result', {
+						list: list
+					});
+				}
 			});
 		});
 	}
