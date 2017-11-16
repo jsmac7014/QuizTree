@@ -3,21 +3,30 @@ include card
 doctype html
 html(lang='ko')
 	+top('QuizTree','index',isLogin,username)
-		script.
-			const webSocket = new WebSocket('wss://quiztree.xyz:5782');
-			webSocket.onopen = event => {};
-			function likeBtn(id) {
-			webSocket.send(JSON.stringify({
+	script.
+		var webSocket = new WebSocket('wss://quiztree.xyz:5782');
+		webSocket.onopen = event => {console.log(event);};
+		webSocket.onerror = event =>{console.log(event);};
+		function likeBtn(id) {
+		console.log(id);
+		webSocket.send(JSON.stringify({
 			id:id,
-			token:`${token}`
+			type:'like',
+			token:'#{token}'
 			}));
-			}
-		.container
-			.wrapper
-				- for(quiz in list){
-					+card(quiz.name, quiz.explan, quiz.tags, quiz.time, quiz.auther, quiz.id)
-				- }
-			a(href="/create/")#addBtn.button
-				i.fa.fa-plus(aria-hidden='true')
+		}
+	.container
+		.wrapper
+			- function date_ko(date) {
+			- date= new Date(date);
+			- return `${date.getFullYear()}/${date.getMonth()+1}/${date.getDay()} ${date.getHours()}:${date.getMinutes()}`;
+			- }
+			- for(quiz in list){
+				- list[quiz].Information = JSON.parse(list[quiz].Information);
+				- list[quiz].time = date_ko(list[quiz].time);
+				+card(list[quiz].title, list[quiz].Information.info, list[quiz].tags, list[quiz].time, list[quiz].username, list[quiz].id)
+			- }
+		a(href="/make/")#addBtn.button
+			i.fa.fa-plus(aria-hidden='true')
 		script(src='./js/index.js')
 		+msg_alert(usermsg)
