@@ -269,8 +269,11 @@ app.post('/search', (req, res) => {
 	} else res.redirect('/login');
 });
 app.get('/search/:key', (req, res) => {
-	if(req.session.search ==DBERROR){
-
+	if (req.session.search == DBNONRESULT) {
+		res.render('noresult',{
+			username: req.session.username,
+			word:req.params.key
+		});
 	}
 	if (!isLogin(req)) {
 		res.redirect('/login');
@@ -278,11 +281,7 @@ app.get('/search/:key', (req, res) => {
 		const list = [];
 		DB.query(`SELECT * FROM quizes WHERE title LIKE %${req.params.key}%`, (err, result) => {
 			DB.query(`SELECT * FROM tags WHERE tag LIKE %${req.params.key}%`, (err2, result2) => {
-				if (err && err2) {
-					req.session.search = DBERROR;
-					res.redirect(URL('/search'));
-				}
-				if (result.length < 0 && result2.length < 0) {
+				if ((err && err2) || (result.length < 0 && result2.length < 0)) {
 					req.session.search = DBNONRESULT;
 					res.redirect(URL('/search'));
 				}
