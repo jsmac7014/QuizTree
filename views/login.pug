@@ -9,43 +9,42 @@ html(lang='ko')
 		link(rel='icon', href='./img/favicon.ico', type='image/x-icon')
 		link(rel='stylesheet', href='./css/font-awesome/css/font-awesome.min.css')
 		link(rel='stylesheet', href='./css/font/stylesheet.css')
-		link(rel='stylesheet', href='./css/login.css')
+		link(rel='stylesheet', href='./css/register.css')
 		link(rel='stylesheet', href='./css/bulma.css')
 		title Login
 	body
 		.container
-			.wrapper
-				.image
-					img(src='./img/QuizTree@2.png', alt='QuizTree')
-			.wrapper
-				.title
-					h1 QuizTree
-				form(method='post', action='/login')
+			#background-card.card.blur
+				.wrapper
+					h1
+						| QuizTree에 오신걸
+						br
+						| 환영합니다
+					p
+						| QuizTree는 퀴즈를 풀 수 있는
+						br
+						| 소셜미디어입니다
+					p
+						| QuizTree를 이용하기 위해서는
+						br
+						| 회원가입을 해주세요
+			.card
+				.wrapper
 					.field
 						label.label Email
 						.control.has-icons-left.has-icons-right
-							input.input(type='email', placeholder='Email', name='email')
+							input.custom.input(type='email', placeholder='Email', name='email')
 							span.icon.is-small.is-left
 								i.fa.fa-envelope
-							//
-								<span class="icon is-small is-right">
-								<i class="fa fa-warning"></i>
-								</span>
-						// <p class="help is-danger">This email is invalid</p>
 					.field
 						label.label Password
 						.control.has-icons-left.has-icons-right
-							input.input(type='password', placeholder='Password', name='password')
+							input.custom.input(type='password', placeholder='Password', name="password")
 							span.icon.is-small.is-left
 								i.fa.fa-key
-							//
-								<span class="icon is-small is-right">
-								<i class="fa fa-check"></i>
-								</span>
-						// <p class="help is-success">This username is available</p>
 					.field.is-grouped
 						.control
-							button.button.is-tree Login
+							button.custom.button Login
 						.control
-							a.button.is-text(href='/register') Sign Up
+							a.button.is-text(href='./register') SignUp
 		+msg_alert(usermsg)
