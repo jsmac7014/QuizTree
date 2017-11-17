@@ -1,25 +1,94 @@
-include top
 include card
+include msg
 doctype html
 html(lang='ko')
-	+top('QuizTree','index',isLogin,username)
-	script.
-		var webSocket = new WebSocket('wss://quiztree.xyz:5782');
-		webSocket.onopen = event => {webSocket.send(JSON.stringify({
-		id:'rkhSasD1f',
-		type:'like',
-		token:'#{token}'
-		}));};
-		webSocket.onerror = event =>{console.log(event);};
-		function likeBtn(id) {
-		console.log(id);
-		webSocket.send(JSON.stringify({
-		id:id,
-		type:'like',
-		token:'#{token}'
-		}));
-		}
-	.container
+	head
+		meta(charset='UTF-8')
+		meta(name='viewport', content='width=device-width, initial-scale=1.0')
+		meta(http-equiv='X-UA-Compatible', content='ie=edge')
+		link(rel='shortcut icon', href='./img/favicon.ico', type='image/x-icon')
+		link(rel='icon', href='./img/favicon.ico', type='image/x-icon')
+		link(rel='stylesheet', href='./css/font-awesome/css/font-awesome.min.css')
+		link(rel='stylesheet', href=`./css/index.css`)
+		link(rel='stylesheet', href='./css/bulma.css')
+		link(rel='stylesheet', href='./css/font.css')
+		title QuizTree
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
+		script.
+			document.addEventListener('DOMContentLoaded', function () {
+			var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+			if ($navbarBurgers.length > 0) {
+			$navbarBurgers.forEach(function ($el) {
+			$el.addEventListener('click', function () {
+			var target = $el.dataset.target;
+			var $target = document.getElementById(target);
+			$el.classList.toggle('is-active');
+			$target.classList.toggle('is-active');
+			});
+			});
+			}
+			});
+	body
+		script(src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.slim.js")
+		script.
+			const socket = io.connect('https://quiztree.xyz:5782');
+			let flag = !{ids};
+			function likeBtn(id){
+			flag[id] = !flag[id];
+			let f = flag[id] ? 'like':'rmlike';
+			socket.emit(f,{
+			quizid:id,
+			token:'#{token}'
+			});
+			console.log('like!');
+			}
+		nav.navbar.is-transparent
+			.navbar-brand
+				a.navbar-item(href='/')
+					img(src='./img/QuizTree@2.png', alt='QuizTree')
+					h1(style='margin-left:10px;font-size:24px') QuizTree
+				.navbar-burger.burger(data-target='navMenu')
+					span
+					span
+					span
+			.navbar-menu#navMenu
+				.navbar-start
+					form(method='post', action='search')
+						input#searchbar.input(type='text', placeholder='Search',name='word')
+				- if(!isLogin){
+					.navbar-end
+						.navbar-item
+							.field.is-grouped
+								p.control
+									a.custom.bd-tw-button.button(target='_blank', href='/register')
+										span.icon
+											i.fa.fa-user-plus
+										span
+											| Register
+								p.control
+									a.custom.button.is-primary(href='/login')
+										span.icon
+											i.fa.fa-sign-in
+										span Login
+				- } else {
+					.navbar-end
+						.navbar-item
+							.field.is-grouped
+								p.control
+									a.custom.bd-tw-button.button(target='_blank', href='/mypage')
+										span.icon
+											i.fa.fa-user-o(aria-hidden='true')
+										span
+											| #{username}
+								a(href='/logout')
+									p.control
+											button.custom.bd-tw-button.button
+												span.icon
+													i.fa.fa-sign-out(aria-hidden='true')
+												span
+													| Logout
+				- }
+	.containers
 		.wrapper
 			- function date_ko(date) {
 			- date= new Date(date);
@@ -30,7 +99,7 @@ html(lang='ko')
 				- list[quiz].time = date_ko(list[quiz].time);
 				+card(list[quiz].title, list[quiz].Information.info, list[quiz].tags, list[quiz].time, list[quiz].username, list[quiz].id)
 			- }
-		a(href="/make/")#addBtn.button
+		a(href="/make")#addBtn.button
 			i.fa.fa-plus(aria-hidden='true')
 		script(src='./js/index.js')
 		+msg_alert(usermsg)
