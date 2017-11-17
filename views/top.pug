@@ -1,4 +1,4 @@
-mixin top(title,css,isLogin,username,token)
+mixin top(title,css,isLogin,username)
 	include msg
 	head
 		meta(charset='UTF-8')
@@ -12,7 +12,20 @@ mixin top(title,css,isLogin,username,token)
 		link(rel='stylesheet', href='./css/font.css')
 		title #{title}
 		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
-		+dom()
+		script(type='text/javascript').
+		document.addEventListener('DOMContentLoaded', function () {
+		var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+		if ($navbarBurgers.length > 0) {
+		$navbarBurgers.forEach(function ($el) {
+		$el.addEventListener('click', function () {
+		var target = $el.dataset.target;
+		var $target = document.getElementById(target);
+		$el.classList.toggle('is-active');
+		$target.classList.toggle('is-active');
+		});
+		});
+		}
+		});
 	body
 		nav.navbar.is-transparent
 			.navbar-brand
