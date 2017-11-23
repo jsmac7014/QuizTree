@@ -1,62 +1,115 @@
-include top
 doctype html
 html(lang='ko')
-	+top('QuizTree - Make Quiz','make',true,username)
+	head
+		meta(charset='UTF-8')
+		meta(name='viewport', content='width=device-width, initial-scale=1.0')
+		meta(http-equiv='X-UA-Compatible', content='ie=edge')
+		link(rel='shortcut icon', href='./img/favicon.ico', type='image/x-icon')
+		link(rel='icon', href='./img/favicon.ico', type='image/x-icon')
+		link(rel='stylesheet', href='./css/font-awesome/css/font-awesome.min.css')
+		link(rel='stylesheet', href=`./css/make.css`)
+		link(rel='stylesheet', href='./css/bulma.css')
+		link(rel='stylesheet', href='./css/font.css')
+		title QuizTree - Make your Quiz
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
+		script.
+			document.addEventListener('DOMContentLoaded', function () {
+			var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+			if ($navbarBurgers.length > 0) {
+			$navbarBurgers.forEach(function ($el) {
+			$el.addEventListener('click', function () {
+			var target = $el.dataset.target;
+			var $target = document.getElementById(target);
+			$el.classList.toggle('is-active');
+			$target.classList.toggle('is-active');
+			});
+			});
+			}
+			});
+	body
+		nav.navbar.is-transparent
+			.navbar-brand
+				a.navbar-item(href='/')
+					img(src='./img/QuizTree@2.png', alt='QuizTree')
+					h1(style='margin-left:10px;font-size:24px') QuizTree
+				.navbar-burger.burger(data-target='navMenu')
+					span
+					span
+					span
+			#navMenu.navbar-menu
+				.navbar-start
+					input#searchbar.input(type='text', placeholder='Search',name='word')
+				.navbar-end
+					.navbar-item
+						.field.is-grouped
+							p.control
+								a.bd-tw-button.button(target='_blank', href='#')
+									span.icon
+										i.fa.fa-user-o(aria-hidden='true')
+									span
+										| #{username}
+							a(href='/logout')
+								p.control
+										button.bd-tw-button.button
+											span.icon
+												i.fa.fa-sign-out(aria-hidden='true')
+											span
+												| Logout
 	.container
-		.wrapper
+		.wrapper#wrapper
 			h1.title 퀴즈를 만드세요!
-			form(action='./make', method='post')
+			form(action='./make', method='post')#fo
+				input#quizs(type='hidden',value='1',name='quizs')
 				.title.card
 					.field
 						.control
-							input.input.is-large(type='text', placeholder='퀴즈 제목', name='title')
+							input.input.is-large(type='text', placeholder='퀴즈 제목', name='title',required='')
 					.field
 						.control
-							input.input(type='text', placeholder='퀴즈 설명', name='info')
+							input.input(type='text', placeholder='퀴즈 설명', name='info',required='')
 					.field
 						.control
-							input.input(type='text', placeholder='#해시태그', name='tags')
-				.quiz.card
+							input.input(type='text', placeholder='#해시태그', name='tags',required='')
+				.quiz.card#f
 					.field
 						.control
-							input.input.is-medium(type='text', placeholder='질문을 입력하세요', name='questions')
+							input.input.is-medium(type='text', placeholder='질문을 입력하세요', name='questions1',required='')
 					.answer
 						h3.title.is-4 정답
 						.control
 							label.radio
-								input(type='radio', name='answerradio1',value='A')
+								input(type='radio', name='answerradio1',value='a',required='')
 								|  A
 							label.radio
-								input(type='radio', name='answerradio1',value='B')
+								input(type='radio', name='answerradio1',value='b')
 								|  B
 							label.radio
-								input(type='radio', name='answerradio1',value='C')
+								input(type='radio', name='answerradio1',value='c')
 								|  C
 							label.radio
-								input(type='radio', name='answerradio1',value='D')
+								input(type='radio', name='answerradio1',value='d')
 								|  D
 					.columns
 						.column
 							.field
 								.control
-									input.input.is-small(type='text', placeholder='옵션 A',name='answertexta1')
+									input.input.is-small(type='text', placeholder='옵션 A',name='answertexta1',required='')
 						.column
 							.field
 								.control
-									input.input.is-small(type='text', placeholder='옵션 B',name='answertextb1')
+									input.input.is-small(type='text', placeholder='옵션 B',name='answertextb1',required='')
 					.columns
 						.column
 							.field
 								.control
-									input.input.is-small(type='text', placeholder='옵션 C',name='answertextc1')
+									input.input.is-small(type='text', placeholder='옵션 C',name='answertextc1',required='')
 						.column
 							.field
 								.control
-									input.input.is-small(type='text', placeholder='옵션 D',name='answertextd1')
-				input#quizs(type='hidden',value='1',name='quizs')
-				.add
-					button#addBtn
-						i.fa.fa-plus(aria-hidden='true')
+									input.input.is-small(type='text', placeholder='옵션 D',name='answertextd1',required='')
 				button#sendBtn.button
 					i.fa.fa-paper-plane-o(aria-hidden='true')
-				script(src='./js/make.js')
+			.add
+				button#addBtn
+					i.fa.fa-plus(aria-hidden='true')
+			script(src='./js/make.js')

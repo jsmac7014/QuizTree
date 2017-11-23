@@ -241,16 +241,18 @@ html(lang='ko')
 			}
 			return binb2hex(binarray);
 			}
-			const answer = ['#{answers}'];
+			let answer =[!{answers}];
 			function check(value,num){
 			document.getElementById('ra'+num).setAttribute('disabled',true);
 			document.getElementById('rb'+num).setAttribute('disabled',true);
 			document.getElementById('rc'+num).setAttribute('disabled',true);
 			document.getElementById('rd'+num).setAttribute('disabled',true);
-			if(answer[num]== SHA512(value)){
-			document.getElementById('card'+num).className = document.getElementById('card'+num).className + " correct"
+			if(answer[num]== value){
+			document.getElementById('card'+num).className = document.getElementById('card'+num).className + " correct";
+			document.getElementById('msg'+num).innerHTML = '맞았습니다.';
 			}else{
-			document.getElementById('card'+num).className = document.getElementById('card'+num).className + " wrong"
+			document.getElementById('card'+num).className = document.getElementById('card'+num).className + " wrong";
+			document.getElementById('msg'+num).innerHTML = '틀렸습니다.';
 			}
 			}
 	body
@@ -263,17 +265,18 @@ html(lang='ko')
 							p #{questions[n]}
 						.options
 							.column
-								button.custom-btn.button(type='submit', id=`ra${n}`, onclick=`check('A',${n})`)
+								button.custom-btn.button(type='submit', id=`ra${n}`, onclick=`check('${radiolist[n][0]}',${n})`)
 									i.fa.fa-check-circle-o(aria-hidden='true')
 									span #{radiotext[n].a}
-								button.custom-btn.button(type='submit', id=`rb${n}`, onclick=`check('B',${n})`)
+								button.custom-btn.button(type='submit', id=`rb${n}`, onclick=`check('${radiolist[n][1]}',${n})`)
 									i.fa.fa-check-circle-o(aria-hidden='true')
 									span #{radiotext[n].b}
 							.column
-								button.custom-btn.button(type='submit', id=`rc${n}`, onclick=`check('C',${n})`)
+								button.custom-btn.button(type='submit', id=`rc${n}`, onclick=`check('${radiolist[n][2]}',${n})`)
 									i.fa.fa-check-circle-o(aria-hidden='true')
 									span #{radiotext[n].c}
-								button.custom-btn.button(type='submit', id=`rd${n}`, onclick=`check('D',${n})`)
+								button.custom-btn.button(type='submit', id=`rd${n}`, onclick=`check('${radiolist[n][3]}',${n})`)
 									i.fa.fa-check-circle-o(aria-hidden='true')
 									span #{radiotext[n].d}
+						.check(id=`msg${n}`)
 				- }

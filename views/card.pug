@@ -1,4 +1,4 @@
-mixin card(name, explan, tags, time, auther, id)
+mixin card(name, explan, tags, time, auther, id, like)
 	.card
 		header.card-header
 			p.card-header-title
@@ -9,15 +9,14 @@ mixin card(name, explan, tags, time, auther, id)
 				br
 				- tags = JSON.parse(tags);
 				- for(tag in tags){
-					a.tag.is-light(href=`/tags/${tags[tag]}`) #{tags[tag]}
+					a.tag.is-light(href=`#`) #{tags[tag]}
 				- }
 				br
 				time() #{time}
 				span.author
-					a(herf='#')  @#{auther}
+					a(href=`#`) @#{auther}
 			footer.card-footer
 				a.card-footer-item(href=`/play/${id}`) Play
 				a.card-footer-item(href='#' onclick=`likeBtn('${id}')`)
 					i.fa.fa-thumbs-o-up(aria-hidden='true')
-					| Like
-				a.card-footer-item(href='#') Chat
+					| #{like} Like

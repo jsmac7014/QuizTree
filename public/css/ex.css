@@ -1,0 +1,147 @@
+body{
+	font-family:'Arial', sans-serif!important;
+}
+.user-chat {
+	margin-bottom: 15px;
+	width: 700px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+
+
+.chat-nick {
+	color: #628994;
+	font-size: 1.3rem;
+}
+
+.chat-msg {
+	margin: 0 0 0 20px;
+	font-size: 1.1rem;
+}
+
+.sys-msg {
+	color: #628994;
+	font-size: 1.3rem;
+	text-align: center;
+}
+
+.chat-time {
+	text-align: right;
+	float: right;
+}
+/* ddddd */
+/* top */
+.contents {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+}
+/* middle */
+.article {
+
+}
+/* chat */
+#talk-window {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: row;
+}
+
+
+@media screen and (max-width:996px) {
+	article {
+		margin-right: 0rem!important;
+		clear: right!important;
+		width: 100%;
+	}
+	.user-chat {
+		width: 100%;
+	}
+	.chat-nick {
+		font-size: 1.1rem;
+	}
+	.chat-msg {
+		margin: 0 0 0 20px;
+		font-size: 1rem;
+	}
+}
+
+#text {
+	height: 50px;
+}
+
+#send {
+	background-color: #FFF!important;
+	display: inline-block!important;
+	width: 50px;
+	height: 50px;
+	padding: .1rem;
+	font-size: 1.1rem;
+	font-weight: 400;
+	text-align: center;
+	white-space: nowrap;
+	cursor: pointer;
+	border-left: 0;
+	border: 1px solid #DDD;
+	border-left: 0;
+	vertical-align: bottom;
+}
+
+#talk-window::-webkit-scrollbar
+{
+	width: 10px;
+	background-color: #628994;
+}
+#talk-window::-webkit-scrollbar-thumb
+{
+	background-color: #628994;
+}
+#talk-window::-webkit-scrollbar-track
+{
+    background-color: #F5F5F5;
+}
+.msg-reply-bar {
+	width: 2px;
+	height: 1rem;
+	float: left;
+	background-color: #628994;
+	margin: 0 0.5rem 0 0;
+}
+
+.msg-reply-text {
+	font-size: 1rem;
+	margin: 0 1rem 0 0;
+}
+
+.msg-reply-nick {
+	color: #628994;
+	font-size: 1rem;
+}
+
+.msg-reply {
+	margin-left: 1rem;
+}
+
+.msg-reply-bar,
+.msg-reply-text {
+	display: inline-block;
+}
+
+.reply-bar {
+	width: 2px;
+	height: 1rem;
+	background-color: #628994;
+	margin: 0 0.5rem 0 0.5rem;
+}
+
+.reply-text {
+	font-size: 1.1rem;
+}
+
+.reply-bar,
+.reply-text {
+	display: inline-block;
+}

@@ -37,15 +37,17 @@ body {
     width: 380px;
     margin: 10px;
     border-radius: 10px;
-    overflow-x: hidden;
+    overflow: hidden;
+    height: 238px;
 }
 .card-content{
     padding: 0px!important;
 }
 .content{
-    margin-top: 20px;
+    margin-top: 15px;
     padding-left: 10px;
     padding-right: 10px;
+    height: 102px;
 }
 .card-footer-item i.fa {
     margin-right: 10px;
@@ -69,7 +71,13 @@ body {
     -webkit-transition: background-color 0.3s;
     color: white;
 }
-
+.tag{
+    margin: 3px;
+}
+.substance{
+    display: block;
+    height: 43px;
+}
 #addBtn:hover {
     background-color: white;
     color: #36afff;

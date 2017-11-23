@@ -30,21 +30,22 @@ html(lang='ko')
 						| 회원가입을 해주세요
 			.card
 				.wrapper
-					.field
-						label.label Email
-						.control.has-icons-left.has-icons-right
-							input.custom.input(type='email', placeholder='Email', name='email')
-							span.icon.is-small.is-left
-								i.fa.fa-envelope
-					.field
-						label.label Password
-						.control.has-icons-left.has-icons-right
-							input.custom.input(type='password', placeholder='Password', name="password")
-							span.icon.is-small.is-left
-								i.fa.fa-key
-					.field.is-grouped
-						.control
-							button.custom.button Login
-						.control
-							a.button.is-text(href='./register') SignUp
+					form(method='post', action='/login')
+						.field
+							label.label Email
+							.control.has-icons-left.has-icons-right
+								input.custom.input(type='email', placeholder='Email', name='email')
+								span.icon.is-small.is-left
+									i.fa.fa-envelope
+						.field
+							label.label Password
+							.control.has-icons-left.has-icons-right
+								input.custom.input(type='password', placeholder='Password', name="password")
+								span.icon.is-small.is-left
+									i.fa.fa-key
+						.field.is-grouped
+							.control
+								button.custom.button Login
+							.control
+								a.button.is-text(href='./register') SignUp
 		+msg_alert(usermsg)

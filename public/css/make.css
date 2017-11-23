@@ -6,10 +6,13 @@ body{
 }
 .navbar-start {
     padding: 8px 16px;
+
 }
 
 .navbar-start input {
     width: 400px;
+    border-radius: 25px;
+
 }
 .container{
     width: 100%;
@@ -26,15 +29,25 @@ body{
 .title{
     text-align: center;
 }
+.card{
+    border-radius: 10px;
+    padding:10px;
+}
+.card input{
+    border-radius: 15px!important;
+}
+.custom{
+    border-radius: 25px!important;
+}
+
 .title.card{
     width: 450px;
     height: 180px;
-    padding: 10px;
 }
 .quiz.card{
     width: 450px;
     height: 230px;
-    padding: 10px;
+
     margin-bottom: 20px;
 }
 .answer{
@@ -45,7 +58,7 @@ body{
     align-items: center;
 }
 .title.is-4{
-    margin: 5px;
+    margin: 0px;
 }
 .column{
     padding-top: 8px;
@@ -98,11 +111,11 @@ button{
     background-color: #36afff;
     color: white;
 }
+.title.is-4{
+	margin: 0!important
+}
 @media screen and (max-width:750px){
     .wrapper{
-        top: 30px;
-    }
-    .add{
         top: 30px;
     }
     .title.card{

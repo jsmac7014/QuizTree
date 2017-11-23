@@ -15,7 +15,7 @@ html(lang='ko')
 		title QuizTree
 		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
 		script.
-			document.addEventListener('DOMContentLoaded', function () {
+			document.addEventListener('DOMContentLoaded', () =>{
 			var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
 			if ($navbarBurgers.length > 0) {
 			$navbarBurgers.forEach(function ($el) {
@@ -40,7 +40,7 @@ html(lang='ko')
 			quizid:id,
 			token:'#{token}'
 			});
-			console.log('like!');
+			location.reload(true);
 			}
 		nav.navbar.is-transparent
 			.navbar-brand
@@ -75,7 +75,7 @@ html(lang='ko')
 						.navbar-item
 							.field.is-grouped
 								p.control
-									a.custom.bd-tw-button.button(target='_blank', href='/mypage')
+									a.custom.bd-tw-button.button(target='_blank', href='#')
 										span.icon
 											i.fa.fa-user-o(aria-hidden='true')
 										span
@@ -88,16 +88,19 @@ html(lang='ko')
 												span
 													| Logout
 				- }
-	.containers
+	.container
 		.wrapper
+			-const zero = num => {
+			- return num < 10 && num >= 0 ? "0" + num : num;
+			- }
 			- function date_ko(date) {
-			- date= new Date(date);
-			- return `${date.getFullYear()}/${date.getMonth()+1}/${date.getDay()} ${date.getHours()}:${date.getMinutes()}`;
+			- date= new Date(date + 32400000);
+			- return `${date.getFullYear()}년 ${zero(date.getMonth()+1)}월 ${zero(date.getDate())}일 ${zero(date.getHours())}시${zero(date.getMinutes())}분`;
 			- }
 			- for(quiz in list){
 				- list[quiz].Information = JSON.parse(list[quiz].Information);
 				- list[quiz].time = date_ko(list[quiz].time);
-				+card(list[quiz].title, list[quiz].Information.info, list[quiz].tags, list[quiz].time, list[quiz].username, list[quiz].id)
+				+card(list[quiz].title, list[quiz].Information.info, list[quiz].tags, list[quiz].time, list[quiz].username, list[quiz].id, list[quiz].likes)
 			- }
 		a(href="/make")#addBtn.button
 			i.fa.fa-plus(aria-hidden='true')

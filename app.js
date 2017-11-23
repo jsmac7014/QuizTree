@@ -55,13 +55,15 @@ const addAccount = (email, password, nick, token) => {
 		token: token
 	});
 };
-const addQuiz = (id, account, title, info, tags) => {
+const addQuiz = (id, account, title, info, tags, username) => {
 	if (createQuery(`INSERT INTO quizes SET ?`, {
 			id: id,
 			account: account,
 			title: title,
-			information: JSON.stringify(info),
-			time: new Date().getTime()
+			Information: JSON.stringify(info),
+			time: new Date().getTime(),
+			tags: JSON.stringify(tags),
+			username: username
 		}) == DBERROR) return DBERROR;
 	tags.forEach(v => {
 		if (v !== '') {
@@ -139,11 +141,13 @@ const search_middle = (req, res, next) => {
 	});
 };
 const tag_middle = (req, res, next) => {
+	Sync(() => {
 	const key = req.params.id;
 	req.middlelist = {};
-	Sync(() => {
 		DB.query(`SELECT * FROM tags WHERE tag = ${DB.escape(key)}`, (err, result) => {
-			if (err || result.length < 0) next();
+			console.log(result);
+			if (err) throw err;
+			if (err || result.length == 0) next();
 			else {
 				Sync(() => {
 					result.forEach(v => {
@@ -152,10 +156,10 @@ const tag_middle = (req, res, next) => {
 							if (!(err3 || result3.length === 0)) req.middlelist[result3[0].id] = result3[0];
 						});
 					});
-					next();
 				});
 			}
 		});
+		next();
 	});
 };
 app.set('trust proxy', true);
@@ -200,21 +204,28 @@ mailer.extend(app, {
 });
 app.get('/', (req, res) => {
 	DB.query(`SELECT * FROM quizes ORDER BY time DESC LIMIT 0,9999`, (err, result) => {
-		if (err || result.length < 0) res.render('index', {
+		if (err || result.length === 0) res.render('index', {
 			usermsg: ifIsContainReturnUserMsg(req),
 			isLogin: isLogin(req),
 			username: req.session.username,
 			token: req.session.token,
-			list: result
+			list: result,
+			ids: {}
 		});
-		else
+		else {
+			var li = {};
+			Object.keys(result).map(v => {
+				return li[result[v]['id']] = false;
+			});
 			res.render('index', {
 				usermsg: ifIsContainReturnUserMsg(req),
 				isLogin: isLogin(req),
 				username: req.session.username,
 				token: req.session.token,
-				list: result
+				list: result,
+				ids: JSON.stringify(li)
 			});
+		}
 	});
 
 });
@@ -222,7 +233,10 @@ app.get('/login', (req, res) => {
 	if (!isLogin(req)) res.render('login', {
 		usermsg: ifIsContainReturnUserMsg(req)
 	});
-	else res.render(URL('/'));
+	else res.redirect(URL('/'));
+});
+app.get('/test', (req, res) => {
+	res.render('test');
 });
 app.post('/login', (req, res) => {
 	DB.query(`SELECT * FROM account WHERE email = ${DB.escape(req.body.email)} AND password = '${sha512(req.body.password+DBPassword)}'`, (err, result) => {
@@ -244,8 +258,14 @@ app.post('/login', (req, res) => {
 		}
 	});
 });
+app.get('/logout', (req, res) => {
+	req.session.destroy();
+	res.clearCookie('sid');
+	res.redirect('back');
+});
 app.post('/register', (req, res) => {
-	const token = sha512(req.body.email + new Date().getMilliseconds() + req.body.password + new Date().getTime());
+	console.log(req.body);
+	const token = sha512(req.body.email + new Date().getMilliseconds() +''+ req.body.password + new Date().getTime());
 	req.usermsg = addAccount(req.body.email, sha512(req.body.password + DBPassword), req.body.name, token) != DBERROR ? '' : '회원가입에 실패하였습니다. 다시 시도하세요.';
 	app.mailer.send('email', {
 		to: req.body.email,
@@ -264,14 +284,6 @@ app.get('/register', (req, res) => {
 	});
 	else res.redirect(URL('/'));
 });
-app.get('/mypage', (req, res) => {
-	if (isLogin(req)) res.render('mypage', {
-		usermsg: ifIsContainReturnUserMsg(req),
-		username: req.session.username,
-		token: req.session.token
-	});
-	else res.redirect('/login');
-});
 app.get('/email', (req, res) => {
 	if (isContains(req.query, 'query')) {
 		if (equalToken(req.query.query)) res.redirect('/?msg=success');
@@ -279,34 +291,41 @@ app.get('/email', (req, res) => {
 });
 app.get('/make', (req, res) => {
 	if (isLogin(req)) res.render('make', {
-		token: req.session.token
+		token: req.session.token,
+		username: req.session.username
 	});
 	else res.redirect('/login');
 });
-app.get('/logout', (req, res) => {
-	req.session.destroy();
-	res.clearCookie('sid');
-	res.redirect('back');
+app.get('/make/', (req, res) => {
+	res.redirect(URL('/make'));
+});
+app.get('/login/', (req, res) => {
+	res.redirect(URL('/login'));
+});
+app.get('/register/', (req, res) => {
+	res.redirect(URL('/register'));
 });
 app.post('/make', (req, res) => {
-	req.session.usermsg = addQuiz(shortID.generate(), req.session.email, req.body.title, {
+	const slice = req.body.tags.split('#');
+	const tags = req.body.tags.split('#');
+	tags.splice(0, 1);req.session.usermsg = addQuiz(shortID.generate(), req.session.email, req.body.title, {
 		info: req.body.info,
 		radio: mapRange(parseInt(req.body.quizs), (v, data) => {
-			return data['answerradio' + v];
+			return data['answerradio' + (v + 1)];
 		}, req.body),
-		radioText: mapRange(req.body.quizs, (v, data) => {
+		radioText: mapRange(parseInt(req.body.quizs), (v, data) => {
 			return {
-				a: data['answerradio' + v],
-				b: data['answerradio' + v],
-				c: data['answerradio' + v],
-				d: data['answerradio' + v]
+				a: data['answertexta' + (v + 1)],
+				b: data['answertextb' + (v + 1)],
+				c: data['answertextc' + (v + 1)],
+				d: data['answertextd' + (v + 1)]
 			};
 		}, req.body),
-		questions: mapRange(req.body.quizs, (v, data) => {
-			return data['questions' + v];
+		questions: mapRange(parseInt(req.body.quizs), (v, data) => {
+			return data['questions' + (v + 1)];
 		}, req.body)
-	}, req.body.tags.split('#')) == DBERROR ? '퀴즈생성에 실패하였습니다.' : '';
-	res.redirect(URL('/make'));
+	}, tags, req.session.username) == DBERROR ? '퀴즈생성에 실패하였습니다.' : '';
+	res.redirect(URL('/'));
 });
 app.get('/play/:id', (req, res) => {
 	if (isLogin(req)) {
@@ -314,12 +333,20 @@ app.get('/play/:id', (req, res) => {
 			if (err || result.length === 0) res.redirect(URL('/'));
 			else {
 				result[0].Information = JSON.parse(result[0].Information);
-				const answer = result[0].Information.radio.map(v=>{return sha512(v);});
+				const answer = result[0].Information.radio.map(v => {
+					return "'" + sha512(v) + "'";
+				});
+				const radiolist = result[0].Information.radioText.map(v => {
+					return Object.keys(v).map(v2 => {
+						return sha512(v2);
+					});
+				});
 				res.render('play', {
 					title: result[0].title,
 					token: req.session.token,
 					questions: result[0].Information.questions,
 					radiotext: result[0].Information.radioText,
+					radiolist: radiolist,
 					answers: answer
 				});
 			}
@@ -330,9 +357,7 @@ app.post('/search', (req, res) => {
 	if (isLogin(req)) res.redirect(URL('/search/' + req.body.word));
 	else res.redirect('/login');
 });
-
 app.get('/tags/:tag', tag_middle, (req, res) => {
-	console.log(req.middlelist);
 	if (Object.keys(req.middlelist).length === 0) res.redirect('/');
 	else if (!isLogin(req)) res.redirect('/login');
 	else res.render('result', {
@@ -343,7 +368,6 @@ app.get('/tags/:tag', tag_middle, (req, res) => {
 });
 app.get('/search/:key', search_middle, (req, res) => {
 	const key = req.params.key;
-	console.log(req.middlelist);
 	if (Object.keys(req.middlelist).length === 0) res.render('noresult', {
 		username: req.session.username,
 		word: key
@@ -356,88 +380,8 @@ app.get('/search/:key', search_middle, (req, res) => {
 	});
 });
 const HTTPS = require('https');
-const WebSocketServer = require('websocket').server;
 const options = {
 	key: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/privkey.pem'),
 	cert: fs.readFileSync('/etc/letsencrypt/live/quiztree.xyz/fullchain.pem'),
 };
-const WebServer = HTTPS.createServer(options).listen(5782, (req, res) => {
-	console.log('WebSocket server is working on 5782 Port');
-});
-let socket_server = new WebSocketServer({
-	httpServer: WebServer,
-	autoAcceptConnections: true
-});
-
-function UserClient(i, cli) {
-	this.id = i;
-	this.client = cli;
-	this.sendData = data => {
-		console.log(data);
-		try {
-			this.client.sendUTF(JSON.stringify(data));
-		} catch (ex) {
-			throw ex;
-		}
-	};
-}
-let clients = [];
-let id = 0;
-socket_server.on('request', request => {
-	let fd = fs.openSync('logs/' + new Date().getTime(), 'a+', 0666);
-	fs.writeSync(fd, JSON.stringify(request));
-	fs.closeSync(fd);
-	if (request.origin.indexOf("quiztree.xyz") < 0) {
-		request.reject();
-		return;
-	}
-	let clientID = id++;
-	let connection = request.accept(null, request.origin);
-	clients[clientID] = new UserClient(clientID, connection);
-	connection.on('message', message => {
-		const data = JSON.parse(message.utf8Data);
-		console.log(data);
-		if (equalToken(data.token)) {
-			switch (data.type) {
-				case "like":
-					DB.query(`UPDATE quizes SET likes = likes +1 WHERE id = ` + DB.escape(data.quizid));
-					DB.query('INSERT INTO quiz_log SET ?', {
-						email: data.email,
-						id: data.quizid
-					});
-					break;
-				case "likeuser":
-					DB.query(`UPDATE account SET likes = likes +1 WHERE email = ` + DB.escape(data.targetemail));
-					DB.query('INSERT INTO userlike_log SET ?', {
-						email: data.email,
-						target: data.targetemail
-					});
-					break;
-				case "rmlike":
-					DB.query(`UPDATE quizes SET likes = likes - 1 WHERE id = ` + DB.escape(data.quizid));
-					DB.query('DELETE FROM quiz_log WHERE ?', {
-						email: data.email,
-						id: data.quizid
-					});
-					break;
-				case "rmuser":
-					DB.query(`UPDATE account SET likes = likes - 1 WHERE email = ` + DB.escape(data.email));
-					DB.query('DELETE FROM  ?', {
-						email: data.email,
-						target: data.targetemail
-					});
-					break;
-				case "chat":
-					DB.query('INSERT INTO chat SET ?', {
-						email: data.email,
-						target: data.targetemail,
-						msg: data.msg
-					});
-					break;
-				default:
-					break;
-			}
-		}
-	});
-});
 const server = HTTPS.createServer(options, app).listen(443);
